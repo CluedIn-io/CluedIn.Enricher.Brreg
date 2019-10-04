@@ -1,1 +1,1 @@
-# CuedIn.Enricher.Brreg
+# CluedIn.Encricher.Bregg
