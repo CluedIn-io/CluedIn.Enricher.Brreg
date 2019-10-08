@@ -21,19 +21,19 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Vocabularies
         /// </summary>
         public BrregAddressVocabulary()
         {
-            this.VocabularyName = "Brreg Address";
-            this.KeyPrefix      = "brreg.address";
-            this.KeySeparator   = ".";
-            this.Grouping       = EntityType.Geography;
+            VocabularyName = "Brreg Address";
+            KeyPrefix      = "brreg.address";
+            KeySeparator   = ".";
+            Grouping       = EntityType.Geography;
 
-            this.PostalCode         = this.Add(new VocabularyKey("postalCode"));
-            this.PostalArea         = this.Add(new VocabularyKey("postalArea"));
-            this.MunicipalityNumber = this.Add(new VocabularyKey("municipalityNumber"));
-            this.CountryCode        = this.Add(new VocabularyKey("countryCode"));
-            this.Municipality       = this.Add(new VocabularyKey("municipality", VocabularyKeyDataType.GeographyLocation));
-            this.Country            = this.Add(new VocabularyKey("country", VocabularyKeyDataType.GeographyCountry));
-            this.Address            = this.Add(new VocabularyKey("address"));
-            this.Formatted          = this.Add(new VocabularyKey("formatted"));
+            PostalCode         = Add(new VocabularyKey("postalCode"));
+            PostalArea         = Add(new VocabularyKey("postalArea"));
+            MunicipalityNumber = Add(new VocabularyKey("municipalityNumber"));
+            CountryCode        = Add(new VocabularyKey("countryCode"));
+            Municipality       = Add(new VocabularyKey("municipality", VocabularyKeyDataType.GeographyLocation));
+            Country            = Add(new VocabularyKey("country", VocabularyKeyDataType.GeographyCountry));
+            Address            = Add(new VocabularyKey("address"));
+            Formatted          = Add(new VocabularyKey("formatted"));
         }
 
         public VocabularyKey Formatted { get; set; }

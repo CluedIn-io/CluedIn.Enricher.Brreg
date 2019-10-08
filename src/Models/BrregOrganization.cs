@@ -35,22 +35,22 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
         [DeserializeAs(Name = "registrertIFrivillighetsregisteret")]
         public string VoluntaryRegistered { get; set; }
 
-        public bool? VoluntaryRegisteredBool { get { return this.GetBool(this.VoluntaryRegistered); } }
+        public bool? VoluntaryRegisteredBool { get { return GetBool(VoluntaryRegistered); } }
 
         [DeserializeAs(Name = "registrertIMvaregisteret")]
         public string RegisteredImGoodsRegister { get; set; }
 
-        public bool? RegistredImGoodsRegisterBool { get { return this.GetBool(this.RegisteredImGoodsRegister); } }
+        public bool? RegistredImGoodsRegisterBool { get { return GetBool(RegisteredImGoodsRegister); } }
 
         [DeserializeAs(Name = "registrertIForetaksregisteret")]
         public string RegisteredBuisnessRegister { get; set; }
 
-        public bool? RegistredBuisnessRegisterBool { get { return this.GetBool(this.RegisteredBuisnessRegister); } }
+        public bool? RegistredBuisnessRegisterBool { get { return GetBool(RegisteredBuisnessRegister); } }
 
         [DeserializeAs(Name = "registrertIStiftelsesregisteret")]
         public string RegisteredFoundingRegister { get; set; }
 
-        public bool? RegisteredFoundingRegisterBool { get { return this.GetBool(this.RegisteredFoundingRegister); } }
+        public bool? RegisteredFoundingRegisterBool { get { return GetBool(RegisteredFoundingRegister); } }
 
         [DeserializeAs(Name = "antallAnsatte")]
         public int? NumberEmployees { get; set; }
@@ -70,17 +70,17 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
         [DeserializeAs(Name = "konkurs")]
         public string Bankrupt { get; set; }
 
-        public bool? BankruptBool { get { return this.GetBool(this.Bankrupt); } }
+        public bool? BankruptBool { get { return GetBool(Bankrupt); } }
 
         [DeserializeAs(Name = "underAvvikling")]
         public string UnderLiquidation { get; set; }
 
-        public bool? UnderLiquidationBool { get { return this.GetBool(this.UnderLiquidation); } }
+        public bool? UnderLiquidationBool { get { return GetBool(UnderLiquidation); } }
 
         [DeserializeAs(Name = "underTvangsavviklingEllerTvangsopplosning")]
         public string UnderLiquidationOrDissolution { get; set; }
 
-        public bool? UnderLiquidationOrDissolutionBool { get { return this.GetBool(this.UnderLiquidationOrDissolution); } }
+        public bool? UnderLiquidationOrDissolutionBool { get { return GetBool(UnderLiquidationOrDissolution); } }
 
         [DeserializeAs(Name = "sisteInnsendteAarsregnskap")]
         public int LatestFiledAnnualAccounts { get; set; }

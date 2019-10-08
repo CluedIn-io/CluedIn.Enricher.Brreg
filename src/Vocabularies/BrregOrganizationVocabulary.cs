@@ -16,59 +16,59 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Vocabularies
     {
         public BrregOrganizationVocabulary()
         {
-            this.VocabularyName = "Brreg Organization";
-            this.KeyPrefix      = "brreg.organization";
-            this.KeySeparator   = ".";
-            this.Grouping       = EntityType.Organization;
+            VocabularyName = "Brreg Organization";
+            KeyPrefix      = "brreg.organization";
+            KeySeparator   = ".";
+            Grouping       = EntityType.Organization;
 
-            this.AddGroup("Metadata", group =>
+            AddGroup("Metadata", group =>
             {
-                this.Name                               = group.Add(new VocabularyKey("name"));
-                this.BrregNumber                        = group.Add(new VocabularyKey("brregNumber",                        VocabularyKeyDataType.Number));
-                this.FoundedDate                        = group.Add(new VocabularyKey("foundedDate",                        VocabularyKeyDataType.DateTime));
-                this.RegistrationDate                   = group.Add(new VocabularyKey("registrationDate",                   VocabularyKeyDataType.DateTime));
-                this.OrganizationType                   = group.Add(new VocabularyKey("organizationType"));
-                this.OrganizationTypeFull               = group.Add(new VocabularyKey("organizationTypeFull",               VocabularyKeyDataType.Json,         VocabularyKeyVisibility.Hidden));
-                this.VoluntaryRegistered                = group.Add(new VocabularyKey("voluntaryRegistered",                VocabularyKeyDataType.Boolean));
-                this.RegisteredImGoodsRegister          = group.Add(new VocabularyKey("registeredImGoodsRegister",          VocabularyKeyDataType.Boolean));
-                this.RegisteredBusinessRegister         = group.Add(new VocabularyKey("registeredBusinessRegister",         VocabularyKeyDataType.Boolean));
-                this.RegisteredFoundingRegister         = group.Add(new VocabularyKey("registeredFoundingRegister",         VocabularyKeyDataType.Boolean));
-                this.NumberEmployees                    = group.Add(new VocabularyKey("numberEmployees",                    VocabularyKeyDataType.Integer));
-                this.BankruptBool                       = group.Add(new VocabularyKey("bankrupt",                           VocabularyKeyDataType.Boolean));
-                this.UnderLiquidation                   = group.Add(new VocabularyKey("underLiquidation",                   VocabularyKeyDataType.Boolean));
-                this.UnderLiquidationOrDissolution      = group.Add(new VocabularyKey("underLiquidationOrDissolution",      VocabularyKeyDataType.Boolean));
-                this.LatestFiledAnnualAccounts          = group.Add(new VocabularyKey("latestFiledAnnualAccounts",          VocabularyKeyDataType.Boolean));
-                this.LanguageVariant                    = group.Add(new VocabularyKey("languageVariant",                    VocabularyKeyDataType.Boolean));
-                this.BrregUrl                           = group.Add(new VocabularyKey("brregUrl",                           VocabularyKeyDataType.Uri));
-                this.Website                            = group.Add(new VocabularyKey("website",                            VocabularyKeyDataType.Uri));
+                Name                               = group.Add(new VocabularyKey("name"));
+                BrregNumber                        = group.Add(new VocabularyKey("brregNumber",                        VocabularyKeyDataType.Number));
+                FoundedDate                        = group.Add(new VocabularyKey("foundedDate",                        VocabularyKeyDataType.DateTime));
+                RegistrationDate                   = group.Add(new VocabularyKey("registrationDate",                   VocabularyKeyDataType.DateTime));
+                OrganizationType                   = group.Add(new VocabularyKey("organizationType"));
+                OrganizationTypeFull               = group.Add(new VocabularyKey("organizationTypeFull",               VocabularyKeyDataType.Json,         VocabularyKeyVisibility.Hidden));
+                VoluntaryRegistered                = group.Add(new VocabularyKey("voluntaryRegistered",                VocabularyKeyDataType.Boolean));
+                RegisteredImGoodsRegister          = group.Add(new VocabularyKey("registeredImGoodsRegister",          VocabularyKeyDataType.Boolean));
+                RegisteredBusinessRegister         = group.Add(new VocabularyKey("registeredBusinessRegister",         VocabularyKeyDataType.Boolean));
+                RegisteredFoundingRegister         = group.Add(new VocabularyKey("registeredFoundingRegister",         VocabularyKeyDataType.Boolean));
+                NumberEmployees                    = group.Add(new VocabularyKey("numberEmployees",                    VocabularyKeyDataType.Integer));
+                BankruptBool                       = group.Add(new VocabularyKey("bankrupt",                           VocabularyKeyDataType.Boolean));
+                UnderLiquidation                   = group.Add(new VocabularyKey("underLiquidation",                   VocabularyKeyDataType.Boolean));
+                UnderLiquidationOrDissolution      = group.Add(new VocabularyKey("underLiquidationOrDissolution",      VocabularyKeyDataType.Boolean));
+                LatestFiledAnnualAccounts          = group.Add(new VocabularyKey("latestFiledAnnualAccounts",          VocabularyKeyDataType.Boolean));
+                LanguageVariant                    = group.Add(new VocabularyKey("languageVariant",                    VocabularyKeyDataType.Boolean));
+                BrregUrl                           = group.Add(new VocabularyKey("brregUrl",                           VocabularyKeyDataType.Uri));
+                Website                            = group.Add(new VocabularyKey("website",                            VocabularyKeyDataType.Uri));
             });
 
-            this.AddGroup("Location", group =>
+            AddGroup("Location", group =>
             {
-                this.Address                        = group.Add(new BrregAddressVocabulary().AsCompositeKey("postAddress"));
-                this.BusinessAddress                = group.Add(new BrregAddressVocabulary().AsCompositeKey("businessPostAddress"));
+                Address                        = group.Add(new BrregAddressVocabulary().AsCompositeKey("postAddress"));
+                BusinessAddress                = group.Add(new BrregAddressVocabulary().AsCompositeKey("businessPostAddress"));
 
             });
 
-            this.AddGroup("Details", group =>
+            AddGroup("Details", group =>
             {
-                this.IndustryCode                       = group.Add(new VocabularyKey("industryCode",                       VocabularyKeyDataType.Number));
-                this.IndustryDescription                = group.Add(new VocabularyKey("industryDescription"));
-                this.InstitutionSectorCode              = group.Add(new VocabularyKey("institutionSectorCode",              VocabularyKeyDataType.Number));
-                this.InstitutionSectorDescription       = group.Add(new VocabularyKey("institutionSectorDescription"));
+                IndustryCode                       = group.Add(new VocabularyKey("industryCode",                       VocabularyKeyDataType.Number));
+                IndustryDescription                = group.Add(new VocabularyKey("industryDescription"));
+                InstitutionSectorCode              = group.Add(new VocabularyKey("institutionSectorCode",              VocabularyKeyDataType.Number));
+                InstitutionSectorDescription       = group.Add(new VocabularyKey("institutionSectorDescription"));
             });
 
-            this.AddMapping(this.BrregNumber,                   CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.CodesBrreg);
-            this.AddMapping(this.NumberEmployees,               CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.EmployeeCount);
-            this.AddMapping(this.FoundedDate,                   CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.FoundingDate);
-            this.AddMapping(this.Website,                       CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Website);
+            AddMapping(BrregNumber,                   CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.CodesBrreg);
+            AddMapping(NumberEmployees,               CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.EmployeeCount);
+            AddMapping(FoundedDate,                   CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.FoundingDate);
+            AddMapping(Website,                       CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Website);
 
-            this.AddMapping(this.BusinessAddress.Address,       CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Address);
-            this.AddMapping(this.BusinessAddress.CountryCode,   CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressCountryCode);
-            this.AddMapping(this.BusinessAddress.PostalCode,    CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressZipCode);
-            this.AddMapping(this.BusinessAddress.PostalArea,    CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressPostalArea);
+            AddMapping(BusinessAddress.Address,       CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Address);
+            AddMapping(BusinessAddress.CountryCode,   CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressCountryCode);
+            AddMapping(BusinessAddress.PostalCode,    CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressZipCode);
+            AddMapping(BusinessAddress.PostalArea,    CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressPostalArea);
 
-            this.AddMapping(this.IndustryDescription,           CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Industry);
+            AddMapping(IndustryDescription,           CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Industry);
         }
 
         public VocabularyKey OrganizationTypeFull { get; set; }

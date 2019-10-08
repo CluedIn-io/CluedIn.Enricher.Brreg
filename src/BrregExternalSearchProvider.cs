@@ -44,7 +44,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
         public override IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request)
         {
-            if (!this.Accepts(request.EntityMetaData.EntityType))
+            if (!Accepts(request.EntityMetaData.EntityType))
                 yield break;
 
             var existingResults = request.GetQueryResults<BrregOrganization>(this).ToList();
@@ -194,11 +194,11 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             if (resultItem.Data.BrregNumber == 0)
                 return null;
 
-            var code = this.GetOriginEntityCode(resultItem);
+            var code = GetOriginEntityCode(resultItem);
 
             var clue = new Clue(code, context.Organization);
 
-            this.PopulateMetadata(clue.Data.EntityData, resultItem);
+            PopulateMetadata(clue.Data.EntityData, resultItem);
 
             return new[] { clue };
         }
@@ -206,7 +206,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         public override IEntityMetadata GetPrimaryEntityMetadata(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request)
         {
             var resultItem = result.As<BrregOrganization>();
-            return this.CreateMetadata(resultItem);
+            return CreateMetadata(resultItem);
         }
 
         public override IPreviewImage GetPrimaryEntityPreviewImage(
@@ -221,14 +221,14 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         {
             var metadata = new EntityMetadataPart();
 
-            this.PopulateMetadata(metadata, resultItem);
+            PopulateMetadata(metadata, resultItem);
 
             return metadata;
         }
 
         private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<BrregOrganization> resultItem)
         {
-            return new EntityCode(EntityType.Organization, this.GetCodeOrigin(), resultItem.Data.BrregNumber);
+            return new EntityCode(EntityType.Organization, GetCodeOrigin(), resultItem.Data.BrregNumber);
         }
 
         private CodeOrigin GetCodeOrigin()
@@ -238,7 +238,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
         public void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<BrregOrganization> resultItem)
         {
-            var code = this.GetOriginEntityCode(resultItem);
+            var code = GetOriginEntityCode(resultItem);
 
             metadata.EntityType       = EntityType.Organization;
             metadata.Name             = resultItem.Data.Name;
