@@ -326,9 +326,9 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             metadata.Properties[vocabulary.PostalArea]         = address.PostalArea.PrintIfAvailable();
         }
 
-        public string Icon { get; } = "Resources.cluedin.png";
-        public string Domain { get; } = "To be confirmed";
-        public string About { get; } = "A test Enricher used to work with known data during acceptance tests";
+        public string Icon { get; } = "Resources.brreg.png";
+        public string Domain { get; } = "https://www.brreg.no/";
+        public string About { get; } = "Brreg is an enricher which provides information on Norwegian companies";
         public AuthMethods AuthMethods { get; } = null;
         public IEnumerable<Control> Properties { get; } = null;
 		public Guide Guide { get; } = null;
