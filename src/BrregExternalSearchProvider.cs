@@ -15,18 +15,22 @@ using System.Net;
 using CluedIn.Core;
 using CluedIn.Core.Data;
 using CluedIn.Core.Data.Parts;
+using CluedIn.Core.Data.Relational;
+using CluedIn.Core.ExternalSearch;
+using CluedIn.Core.Providers;
 using CluedIn.Crawling.Helpers;
 using CluedIn.ExternalSearch.Filters;
 using CluedIn.ExternalSearch.Providers.Bregg.Models;
 using CluedIn.ExternalSearch.Providers.Bregg.Vocabularies;
 using DomainNameParser;
 using RestSharp;
+using EntityType = CluedIn.Core.Data.EntityType;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg
 {
     /// <summary>The brreg external search provider.</summary>
     /// <seealso cref="CluedIn.ExternalSearch.ExternalSearchProviderBase" />
-    public class BrregExternalSearchProvider : ExternalSearchProviderBase
+    public class BrregExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata
     {
         /**********************************************************************************************************
          * CONSTRUCTORS
@@ -321,5 +325,13 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             metadata.Properties[vocabulary.Address]            = address.Address.PrintIfAvailable(v => string.Join(Environment.NewLine, v));
             metadata.Properties[vocabulary.PostalArea]         = address.PostalArea.PrintIfAvailable();
         }
-    }
+
+        public string Icon { get; } = "Resources.brreg.png";
+        public string Domain { get; } = "https://www.brreg.no/";
+        public string About { get; } = "Brreg is an enricher which provides information on Norwegian companies";
+        public AuthMethods AuthMethods { get; } = null;
+        public IEnumerable<Control> Properties { get; } = null;
+		public Guide Guide { get; } = null;
+		public IntegrationType Type { get; } = IntegrationType.Cloud;
+	}
 }
