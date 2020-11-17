@@ -56,19 +56,19 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             bool NameFilter(string value) => OrganizationFilters.NameFilter(context, value);
             bool BrregFilter(string value) => existingResults.Any(r => string.Equals(r.Data.BrregNumber.ToString(CultureInfo.InvariantCulture), value, StringComparison.InvariantCultureIgnoreCase));
 
-            var postFixes = new[] { "A/S", "AS", "ASA", "I/S", "IS", "K/S", "KS", "ENK", "ANS", "NUF", "P/S", "PS", "Enkeltpersonforetak", "Ansvarlig Selskap", "Aksjeselskap", "Norskregistrert utenlandsk foretak" }.Select(v => v.ToLowerInvariant()).ToHashSet();
-            var contains = new[] { " no", "no ", "norway", "norge", "norsk", "æ", "ø", "å" }.Select(v => v.ToLowerInvariant()).ToHashSet();
+            var postFixes = new[] { "A/S", "AS", "ASA", "I/S", "IS", "K/S", "KS", "ENK", "ANS", "NUF", "P/S", "PS", "Enkeltpersonforetak", "Ansvarlig Selskap", "Aksjeselskap", "Norskregistrert utenlandsk foretak" }.Select(v => v.ToLowerInvariant()).ToHashSetEx();
+            var contains = new[] { " no", "no ", "norway", "norge", "norsk", "æ", "ø", "å" }.Select(v => v.ToLowerInvariant()).ToHashSetEx();
 
-            // Query Input. 
+            // Query Input.
             var entityType = request.EntityMetaData.EntityType;
 
             var name        = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.OrganizationName, new HashSet<string>());
             var countryCode = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressCountryCode, new HashSet<string>());
             var website     = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Website, new HashSet<string>());
 
-            bool CountryFilter(string c) => c.Equals("no", StringComparison.OrdinalIgnoreCase) 
-                                         || c.Equals("NOR", StringComparison.OrdinalIgnoreCase) 
-                                         || c.Equals("Norway", StringComparison.OrdinalIgnoreCase) 
+            bool CountryFilter(string c) => c.Equals("no", StringComparison.OrdinalIgnoreCase)
+                                         || c.Equals("NOR", StringComparison.OrdinalIgnoreCase)
+                                         || c.Equals("Norway", StringComparison.OrdinalIgnoreCase)
                                          || c.Equals("Norge", StringComparison.OrdinalIgnoreCase);
 
             var namePostFixFilter = BrregExternalSearchProviderUtil.NamePostFixFilter(countryCode, CountryFilter, contains, name, postFixes);
