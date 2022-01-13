@@ -48,7 +48,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalSearch.Bregg.Integr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalSearch.Providers.Bregg", "src\ExternalSearch.Providers.Bregg\ExternalSearch.Providers.Bregg.csproj", "{E4BA8311-112F-4BC7-A534-16AE0F9C7635}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalSearch.Providers.Bregg.Provider", "src\ExternalSearch.Providers.Bregg.Provider\ExternalSearch.Providers.Bregg.Provider.csproj", "{4A9DAE55-5D7E-46BD-A557-663732B75888}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Provider.ExternalSearch.Bregg", "src\ExternalSearch.Providers.Bregg.Provider\Provider.ExternalSearch.Bregg.csproj", "{4A9DAE55-5D7E-46BD-A557-663732B75888}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
