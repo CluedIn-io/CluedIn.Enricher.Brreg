@@ -48,6 +48,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalSearch.Bregg.Integr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalSearch.Providers.Bregg", "src\ExternalSearch.Providers.Bregg\ExternalSearch.Providers.Bregg.csproj", "{E4BA8311-112F-4BC7-A534-16AE0F9C7635}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExternalSearch.Providers.Bregg.Provider", "src\ExternalSearch.Providers.Bregg.Provider\ExternalSearch.Providers.Bregg.Provider.csproj", "{4A9DAE55-5D7E-46BD-A557-663732B75888}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{E4BA8311-112F-4BC7-A534-16AE0F9C7635}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4BA8311-112F-4BC7-A534-16AE0F9C7635}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4BA8311-112F-4BC7-A534-16AE0F9C7635}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A9DAE55-5D7E-46BD-A557-663732B75888}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A9DAE55-5D7E-46BD-A557-663732B75888}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A9DAE55-5D7E-46BD-A557-663732B75888}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A9DAE55-5D7E-46BD-A557-663732B75888}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,6 +82,7 @@ Global
 		{17EE3C8D-BAE4-481A-B9CC-1BE878E86124} = {9BD54E81-D9C8-4419-82B8-8EE6CC7E2647}
 		{9C13F59E-C336-467B-89B0-EE9C65E9C951} = {DBD1964B-DBD9-4C70-96CA-391C34B3D75F}
 		{E4BA8311-112F-4BC7-A534-16AE0F9C7635} = {B2A52533-7FBF-41FE-A0AF-874FC54300B2}
+		{4A9DAE55-5D7E-46BD-A557-663732B75888} = {B2A52533-7FBF-41FE-A0AF-874FC54300B2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6A61CB42-80C5-4A83-AC3E-DA41FC875525}

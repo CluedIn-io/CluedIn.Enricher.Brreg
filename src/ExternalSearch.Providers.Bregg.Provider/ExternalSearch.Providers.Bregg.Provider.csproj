@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>CluedIn.Provider.Brreg</AssemblyName>
+    <RootNamespace>CluedIn.Provider.Brreg</RootNamespace>
+  </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Resources\**" />
+      <EmbeddedResource Remove="Resources\**" />
+      <None Remove="Resources\**" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CluedIn.Core" />
+    <PackageReference Include="ComponentHost" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ExternalSearch.Providers.Bregg\ExternalSearch.Providers.Bregg.csproj" />
+  </ItemGroup>
+  
+
+</Project>
