@@ -9,7 +9,7 @@ using CluedIn.Core.ExternalSearch;
 using CluedIn.Core.Providers;
 using CluedIn.Core.Webhooks;
 using CluedIn.ExternalSearch;
-using CluedIn.ExternalSearch.Providers.Brreg;
+using CluedIn.ExternalSearch.Providers.Bregg;
 using CluedIn.Providers.Models;
 using Constants = CluedIn.ExternalSearch.Providers.Bregg.Constants;
 

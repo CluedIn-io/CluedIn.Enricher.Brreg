@@ -11,11 +11,6 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         public const string ProviderName = "Brreg";
         public static readonly Guid ProviderId = new Guid("fb23a770-5d9e-4763-91a7-2d81c3c5bcb9");
 
-        public struct KeyName
-        {
-            public const string ApiToken = "apiToken";
-        }
-
         public static string About { get; set; } = "Brreg is an enricher which provides information on Norwegian companies";
         public static string Icon { get; set; } = "Resources.brreg_logo.svg";
         public static string Domain { get; set; } = "https://www.brreg.no/";
