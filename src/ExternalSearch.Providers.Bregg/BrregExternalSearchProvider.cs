@@ -30,15 +30,17 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 {
     /// <summary>The brreg external search provider.</summary>
     /// <seealso cref="CluedIn.ExternalSearch.ExternalSearchProviderBase" />
-    public class BrregExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata
+    public class BrregExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider
     {
+        private static readonly EntityType[] AcceptedEntityTypes = { EntityType.Organization };
+
         /**********************************************************************************************************
          * CONSTRUCTORS
          **********************************************************************************************************/
 
-        /// <summary>Initializes a new instance of the <see cref="BrregExternalSearchProvider"/> class.</summary>
+            /// <summary>Initializes a new instance of the <see cref="BrregExternalSearchProvider"/> class.</summary>
         public BrregExternalSearchProvider()
-            : base(new Guid("fb23a770-5d9e-4763-91a7-2d81c3c5bcb9"), EntityType.Organization)
+            : base(Constants.ProviderId, AcceptedEntityTypes)
         {
         }
 
@@ -326,12 +328,43 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             metadata.Properties[vocabulary.PostalArea]         = address.PostalArea.PrintIfAvailable();
         }
 
-        public string Icon { get; } = "Resources.brreg_logo.svg";
-        public string Domain { get; } = "https://www.brreg.no/";
-        public string About { get; } = "Brreg is an enricher which provides information on Norwegian companies";
-        public AuthMethods AuthMethods { get; } = null;
-        public IEnumerable<Control> Properties { get; } = null;
-		public Guide Guide { get; } = null;
-		public IntegrationType Type { get; } = IntegrationType.Cloud;
-	}
+        public IEnumerable<EntityType> Accepts(IDictionary<string, object> config, IProvider provider)
+        {
+            return AcceptedEntityTypes;
+        }
+
+        public IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
+        {
+            return BuildQueries(context, request);
+        }
+
+        public IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query, IDictionary<string, object> config, IProvider provider)
+        {
+            return ExecuteSearch(context, query);
+        }
+
+        public IEnumerable<Clue> BuildClues(ExecutionContext context, IExternalSearchQuery query, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
+        {
+            return BuildClues(context, query, result, request);
+        }
+
+        public IEntityMetadata GetPrimaryEntityMetadata(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
+        {
+            return GetPrimaryEntityMetadata(context, result, request);
+        }
+
+        public IPreviewImage GetPrimaryEntityPreviewImage(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
+        {
+            return GetPrimaryEntityPreviewImage(context, result, request);
+        }
+
+        public string Icon { get; } = Constants.Icon;
+        public string Domain { get; } = Constants.Domain;
+        public string About { get; } = Constants.About;
+
+        public AuthMethods AuthMethods { get; } = Constants.AuthMethods;
+        public IEnumerable<Control> Properties { get; } = Constants.Properties;
+        public Guide Guide { get; } = Constants.Guide;
+        public IntegrationType Type { get; } = Constants.IntegrationType;
+    }
 }
