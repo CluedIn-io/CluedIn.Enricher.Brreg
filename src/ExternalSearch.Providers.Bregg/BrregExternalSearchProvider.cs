@@ -21,8 +21,8 @@ using CluedIn.Core.Providers;
 using CluedIn.Crawling.Helpers;
 using CluedIn.ExternalSearch.Filters;
 using CluedIn.ExternalSearch.Providers.Bregg.Models;
+using CluedIn.ExternalSearch.Providers.Bregg.Net;
 using CluedIn.ExternalSearch.Providers.Bregg.Vocabularies;
-using DomainNameParser;
 using RestSharp;
 using EntityType = CluedIn.Core.Data.EntityType;
 
@@ -58,8 +58,8 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             bool NameFilter(string value) => OrganizationFilters.NameFilter(context, value);
             bool BrregFilter(string value) => existingResults.Any(r => string.Equals(r.Data.BrregNumber.ToString(CultureInfo.InvariantCulture), value, StringComparison.InvariantCultureIgnoreCase));
 
-            var postFixes = new[] { "A/S", "AS", "ASA", "I/S", "IS", "K/S", "KS", "ENK", "ANS", "NUF", "P/S", "PS", "Enkeltpersonforetak", "Ansvarlig Selskap", "Aksjeselskap", "Norskregistrert utenlandsk foretak" }.Select(v => v.ToLowerInvariant()).ToHashSetEx();
-            var contains = new[] { " no", "no ", "norway", "norge", "norsk", "æ", "ø", "å" }.Select(v => v.ToLowerInvariant()).ToHashSetEx();
+            var postFixes = new[] { "A/S", "AS", "ASA", "I/S", "IS", "K/S", "KS", "ENK", "ANS", "NUF", "P/S", "PS", "Enkeltpersonforetak", "Ansvarlig Selskap", "Aksjeselskap", "Norskregistrert utenlandsk foretak" }.Select(v => v.ToLowerInvariant()).ToHashSet();
+            var contains = new[] { " no", "no ", "norway", "norge", "norsk", "æ", "ø", "å" }.Select(v => v.ToLowerInvariant()).ToHashSet();
 
             // Query Input.
             var entityType = request.EntityMetaData.EntityType;
