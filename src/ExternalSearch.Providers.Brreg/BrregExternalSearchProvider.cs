@@ -25,6 +25,7 @@ using CluedIn.ExternalSearch.Providers.Brreg.Net;
 using CluedIn.ExternalSearch.Providers.Brreg.Vocabularies;
 using RestSharp;
 using EntityType = CluedIn.Core.Data.EntityType;
+using ExecutionContext = CluedIn.Core.ExecutionContext;
 
 namespace CluedIn.ExternalSearch.Providers.Brreg
 {
