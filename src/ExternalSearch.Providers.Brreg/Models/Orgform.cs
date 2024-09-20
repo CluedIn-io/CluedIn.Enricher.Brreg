@@ -1,14 +1,10 @@
 ﻿using RestSharp.Deserializers;
 
-namespace CluedIn.ExternalSearch.Providers.Brreg.Models
+namespace CluedIn.ExternalSearch.Providers.Brreg.Models;
+
+public class Orgform
 {
-	public class Orgform
-	{
+    [DeserializeAs(Name = "kode")] public string Kode { get; set; }
 
-		[DeserializeAs(Name = "kode")]
-		public string Kode { get; set; }
-
-		[DeserializeAs(Name = "beskrivelse")]
-		public string Beskrivelse { get; set; }
-	}
+    [DeserializeAs(Name = "beskrivelse")] public string Beskrivelse { get; set; }
 }

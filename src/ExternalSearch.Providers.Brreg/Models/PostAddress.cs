@@ -1,29 +1,21 @@
-﻿using System.Collections.Generic;
-using RestSharp.Deserializers;
+﻿using RestSharp.Deserializers;
 
-namespace CluedIn.ExternalSearch.Providers.Brreg.Models
+namespace CluedIn.ExternalSearch.Providers.Brreg.Models;
+
+public class PostAddress
 {
-	public class PostAddress
-	{
-		[DeserializeAs(Name = "adresse")]
-		public List<string> Address { get; set; } 
+    [DeserializeAs(Name = "adresse")] public List<string> Address { get; set; }
 
-		[DeserializeAs(Name = "postnummer")]
-		public string PostalCode { get; set; }
+    [DeserializeAs(Name = "postnummer")] public string PostalCode { get; set; }
 
-		[DeserializeAs(Name = "poststed")]
-		public string PostalArea { get; set; }
+    [DeserializeAs(Name = "poststed")] public string PostalArea { get; set; }
 
-		[DeserializeAs(Name = "kommunenummer")]
-		public string MunicipalityNumber { get; set; }
+    [DeserializeAs(Name = "kommunenummer")]
+    public string MunicipalityNumber { get; set; }
 
-		[DeserializeAs(Name = "kommune")]
-		public string Municipality { get; set; }
+    [DeserializeAs(Name = "kommune")] public string Municipality { get; set; }
 
-		[DeserializeAs(Name = "landkode")]
-		public string CountryCode { get; set; }
+    [DeserializeAs(Name = "landkode")] public string CountryCode { get; set; }
 
-		[DeserializeAs(Name = "land")]
-		public string Country { get; set; }
-	}
+    [DeserializeAs(Name = "land")] public string Country { get; set; }
 }

@@ -3,16 +3,16 @@ name: $(Date:yyyyMMdd)$(Rev:.r)
 trigger:
   branches:
     include:
-    - develop
-    - master
-    - release/*
+      - develop
+      - master
+      - release/*
 
 pr:
   branches:
     include:
-    - develop
-    - master
-    - release/*
+      - develop
+      - master
+      - release/*
 
 resources:
   repositories:
@@ -38,7 +38,7 @@ variables:
 
 steps:
 
-- task: NuGetAuthenticate@0
-  displayName: 'Authenticate with nuget'
+  - task: NuGetAuthenticate@0
+    displayName: 'Authenticate with nuget'
 
-- template: crawler.build.yml@templates
+  - template: crawler.build.yml@templates

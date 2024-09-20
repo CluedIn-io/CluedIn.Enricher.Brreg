@@ -7,10 +7,9 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace CluedIn.ExternalSearch.Providers.Brreg.Vocabularies
+namespace CluedIn.ExternalSearch.Providers.Brreg.Vocabularies;
+
+public class BrregVocabulary
 {
-    public class BrregVocabulary
-    {
-        public static BrregOrganizationVocabulary Organization { get; } = new BrregOrganizationVocabulary();
-    }
+    public static BrregOrganizationVocabulary Organization { get; } = new();
 }

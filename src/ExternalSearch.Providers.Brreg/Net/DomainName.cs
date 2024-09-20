@@ -7,7 +7,7 @@ internal static class DomainName
 {
     private static readonly DomainParser domainParser = new(new WebTldRuleProvider());
 
-    public static bool TryParse(string domain, [NotNullWhen(true)]out DomainInfo? domainInfo)
+    public static bool TryParse(string domain, [NotNullWhen(true)] out DomainInfo? domainInfo)
     {
         try
         {

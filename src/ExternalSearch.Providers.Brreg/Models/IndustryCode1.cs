@@ -1,13 +1,10 @@
 ﻿using RestSharp.Deserializers;
 
-namespace CluedIn.ExternalSearch.Providers.Brreg.Models
-{
-	public class IndustryCode1
-	{
-		[DeserializeAs(Name = "kode")]
-		public string Code { get; set; }
+namespace CluedIn.ExternalSearch.Providers.Brreg.Models;
 
-		[DeserializeAs(Name = "beskrivelse")]
-		public string Description { get; set; }
-	}
+public class IndustryCode1
+{
+    [DeserializeAs(Name = "kode")] public string Code { get; set; }
+
+    [DeserializeAs(Name = "beskrivelse")] public string Description { get; set; }
 }

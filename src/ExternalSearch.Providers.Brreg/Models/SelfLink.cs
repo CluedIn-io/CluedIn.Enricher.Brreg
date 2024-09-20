@@ -1,10 +1,8 @@
 ﻿using RestSharp.Deserializers;
 
-namespace CluedIn.ExternalSearch.Providers.Brreg.Models
+namespace CluedIn.ExternalSearch.Providers.Brreg.Models;
+
+public class SelfLink
 {
-	public class SelfLink
-	{
-		[DeserializeAs(Name = "self")]
-		public LinkHref Self { get; set; }
-	}
+    [DeserializeAs(Name = "self")] public LinkHref Self { get; set; }
 }

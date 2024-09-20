@@ -1,13 +1,10 @@
 ﻿using RestSharp.Deserializers;
 
-namespace CluedIn.ExternalSearch.Providers.Brreg.Models
-{
-	public class Link
-	{
-		[DeserializeAs(Name = "rel")]
-		public string Rel { get; set; }
+namespace CluedIn.ExternalSearch.Providers.Brreg.Models;
 
-		[DeserializeAs(Name = "href")]
-		public string Href { get; set; }
-	}
+public class Link
+{
+    [DeserializeAs(Name = "rel")] public string Rel { get; set; }
+
+    [DeserializeAs(Name = "href")] public string Href { get; set; }
 }
