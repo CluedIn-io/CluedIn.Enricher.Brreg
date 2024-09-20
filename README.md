@@ -1,4 +1,4 @@
-# CluedIn.Enricher.Bregg
+# CluedIn.Enricher.Brreg
 
 # About CluedIn
 CluedIn is the Cloud-native Master Data Management Platform that brings data teams together enabling them to deliver the foundation of high-quality, trusted data that empowers everyone to make a difference. 
