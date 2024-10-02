@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Nordea AS",
+        "address": "Middelfartvej 123",
+        "country": "Norway"
+    },
+    {
+        "name": "Nordea 2",
+        "address": "Fjordvej 123",
+        "country": "NO"
+    }
+]

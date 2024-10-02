@@ -1,7 +1,6 @@
 ﻿using CluedIn.Core.Data.Parts;
-using CluedIn.ExternalSearch;
 
-namespace ExternalSearch.Brreg.Integration.Tests;
+namespace CluedIn.ExternalSearch.Brreg.Integration.Tests;
 
 public class DummyRequest : IExternalSearchRequest
 {

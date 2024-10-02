@@ -7,64 +7,134 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.Globalization;
-using System.Net;
 using CluedIn.Core;
 using CluedIn.Core.Data;
 using CluedIn.Core.Data.Parts;
-using CluedIn.Core.Data.Relational;
+using CluedIn.Core.Data.Vocabularies;
 using CluedIn.Core.ExternalSearch;
 using CluedIn.Core.Providers;
 using CluedIn.Crawling.Helpers;
-using CluedIn.ExternalSearch.Filters;
+using CluedIn.ExternalSearch.Providers.Brreg.Clients;
 using CluedIn.ExternalSearch.Providers.Brreg.Models;
-using CluedIn.ExternalSearch.Providers.Brreg.Net;
 using CluedIn.ExternalSearch.Providers.Brreg.Vocabularies;
-using RestSharp;
 using EntityType = CluedIn.Core.Data.EntityType;
 using ExecutionContext = CluedIn.Core.ExecutionContext;
 
 namespace CluedIn.ExternalSearch.Providers.Brreg;
 
-/// <summary>The brreg external search provider.</summary>
-/// <seealso cref="CluedIn.ExternalSearch.ExternalSearchProviderBase" />
-public class BrregExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata,
+public partial class BrregExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata,
     IConfigurableExternalSearchProvider
 {
-    private static readonly EntityType[] AcceptedEntityTypes = { EntityType.Organization };
-
-    /**********************************************************************************************************
-     * CONSTRUCTORS
-     **********************************************************************************************************/
-
-    /// <summary>Initializes a new instance of the <see cref="BrregExternalSearchProvider" /> class.</summary>
     public BrregExternalSearchProvider()
-        : base(Constants.ProviderId, AcceptedEntityTypes)
+        : base(BrregConstants.ProviderId, Array.Empty<EntityType>())
     {
     }
 
     public IEnumerable<EntityType> Accepts(IDictionary<string, object> config, IProvider provider)
     {
-        return AcceptedEntityTypes;
+        return new List<EntityType> { new BrregJobData(config).AcceptedEntityType }.AsReadOnly();
     }
 
     public IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request,
         IDictionary<string, object> config, IProvider provider)
     {
-        return BuildQueries(context, request);
+        var jobData = new BrregJobData(config);
+
+        if (!Accepts(request.EntityMetaData.EntityType))
+            yield break;
+
+        var countryCode = request.QueryParameters.GetValue(
+                new VocabularyKey(jobData.CountryCodeVocabularyKey), new HashSet<string>())
+            .FirstOrDefault()?
+            .Trim();
+
+        if (string.IsNullOrEmpty(countryCode) &&
+            !string.Equals(countryCode, "no", StringComparison.InvariantCultureIgnoreCase) &&
+            !string.Equals(countryCode, "norway", StringComparison.InvariantCultureIgnoreCase))
+            yield break;
+
+        var brregId =
+            request.QueryParameters.GetValue(
+                    new VocabularyKey(jobData.BrregIdVocabularyKey),
+                    new HashSet<string>())
+                .FirstOrDefault();
+
+        // if we have organization ID, use it
+        if (!string.IsNullOrEmpty(brregId))
+        {
+            yield return new ExternalSearchQuery(
+                this,
+                request.EntityMetaData.EntityType,
+                "brreg_id",
+                brregId);
+        }
+        else
+        {
+            var organizationName =
+                request.QueryParameters.GetValue(
+                        new VocabularyKey(jobData.OrganizationNameVocabularyKey),
+                        new HashSet<string>())
+                    .FirstOrDefault();
+            if (!string.IsNullOrEmpty(organizationName))
+                yield return new ExternalSearchQuery(
+                    this,
+                    request.EntityMetaData.EntityType,
+                    "organization_name",
+                    organizationName);
+        }
     }
 
     public IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query,
         IDictionary<string, object> config, IProvider provider)
     {
-        return ExecuteSearch(context, query);
+        var brregClient = new BrregClient();
+
+        if (query.QueryParameters.TryGetValue("brreg_id", out var brregIds) && brregIds.FirstOrDefault() is { } brregId)
+        {
+            var brregOrganization = brregClient.GetBrregOrganizationByOrganizationNumber(brregId);
+
+            if (brregOrganization != null)
+            {
+                yield return new ExternalSearchQueryResult<BrregOrganization>(query, brregOrganization);
+                yield break;
+            }
+        }
+
+        if (!query.QueryParameters.TryGetValue("organization_name", out var organizationNames) ||
+            organizationNames.FirstOrDefault() is not { } organizationName) yield break;
+
+        foreach (var brregOrganization in brregClient
+                     .GetBrregOrganizationsByName(organizationName)
+                     .Where(x => string.Equals(x.Navn, organizationName, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            yield return new ExternalSearchQueryResult<BrregOrganization>(query, brregOrganization);
+            yield break;
+        }
     }
 
-    public IEnumerable<Clue> BuildClues(ExecutionContext context, IExternalSearchQuery query,
+
+    public IEnumerable<Clue>? BuildClues(ExecutionContext context, IExternalSearchQuery query,
         IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config,
         IProvider provider)
     {
-        return BuildClues(context, query, result, request);
+        var resultItem = result.As<BrregOrganization>();
+
+        if (string.IsNullOrEmpty(resultItem.Data.Organisasjonsnummer))
+            return null;
+
+        var code = new EntityCode(
+            request.EntityMetaData.EntityType,
+            CodeOrigin.CluedIn.CreateSpecific("brreg"),
+            resultItem.Data.Organisasjonsnummer);
+
+        var clue = new Clue(code, context.Organization);
+        clue.Data.EntityData.Codes.Add(request.EntityMetaData.OriginEntityCode);
+
+        clue.Data.EntityData.Name = request.EntityMetaData.Name;
+
+        PopulateMetadata(clue.Data.EntityData, resultItem);
+
+        return new[] { clue };
     }
 
     public IEntityMetadata GetPrimaryEntityMetadata(ExecutionContext context, IExternalSearchQueryResult result,
@@ -73,353 +143,102 @@ public class BrregExternalSearchProvider : ExternalSearchProviderBase, IExtended
         return GetPrimaryEntityMetadata(context, result, request);
     }
 
-    public IPreviewImage GetPrimaryEntityPreviewImage(ExecutionContext context, IExternalSearchQueryResult result,
-        IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
-    {
-        return GetPrimaryEntityPreviewImage(context, result, request);
-    }
+    public string Icon { get; } = BrregConstants.Icon;
+    public string Domain { get; } = BrregConstants.Domain;
+    public string About { get; } = BrregConstants.About;
 
-    public string Icon { get; } = Constants.Icon;
-    public string Domain { get; } = Constants.Domain;
-    public string About { get; } = Constants.About;
-
-    public AuthMethods AuthMethods { get; } = Constants.AuthMethods;
-    public IEnumerable<Control> Properties { get; } = Constants.Properties;
-    public Guide Guide { get; } = Constants.Guide;
-    public IntegrationType Type { get; } = Constants.IntegrationType;
-
-    /**********************************************************************************************************
-     * METHODS
-     **********************************************************************************************************/
-
-    public override IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context,
-        IExternalSearchRequest request)
-    {
-        if (!Accepts(request.EntityMetaData.EntityType))
-            yield break;
-
-        var existingResults = request.GetQueryResults<BrregOrganization>(this).ToList();
-
-        bool NameFilter(string value)
-        {
-            return OrganizationFilters.NameFilter(context, value);
-        }
-
-        bool BrregFilter(string value)
-        {
-            return existingResults.Any(r => string.Equals(r.Data.BrregNumber.ToString(CultureInfo.InvariantCulture),
-                value, StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        var postFixes =
-            new[]
-            {
-                "A/S", "AS", "ASA", "I/S", "IS", "K/S", "KS", "ENK", "ANS", "NUF", "P/S", "PS", "Enkeltpersonforetak",
-                "Ansvarlig Selskap", "Aksjeselskap", "Norskregistrert utenlandsk foretak"
-            }.Select(v => v.ToLowerInvariant()).ToHashSet();
-        var contains = new[] { " no", "no ", "norway", "norge", "norsk", "æ", "ø", "å" }
-            .Select(v => v.ToLowerInvariant()).ToHashSet();
-
-        // Query Input.
-        var entityType = request.EntityMetaData.EntityType;
-
-        var name = request.QueryParameters.GetValue(
-            Core.Data.Vocabularies.Vocabularies.CluedInOrganization.OrganizationName, new HashSet<string>());
-        var countryCode = request.QueryParameters.GetValue(
-            Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressCountryCode, new HashSet<string>());
-        var website = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Website,
-            new HashSet<string>());
-
-        bool CountryFilter(string c)
-        {
-            return c.Equals("no", StringComparison.OrdinalIgnoreCase)
-                   || c.Equals("NOR", StringComparison.OrdinalIgnoreCase)
-                   || c.Equals("Norway", StringComparison.OrdinalIgnoreCase)
-                   || c.Equals("Norge", StringComparison.OrdinalIgnoreCase);
-        }
-
-        var namePostFixFilter =
-            BrregExternalSearchProviderUtil.NamePostFixFilter(countryCode, CountryFilter, contains, name, postFixes);
-
-        if (countryCode != null && countryCode.Any(CountryFilter)) namePostFixFilter = value => false;
-
-        var brregId =
-            request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.CodesBrreg,
-                new HashSet<string>());
-        if (brregId != null && brregId.Any())
-        {
-            var values = brregId;
-
-            foreach (var value in values.Where(v => !BrregFilter(v)))
-                yield return new ExternalSearchQuery(this, entityType, ExternalSearchQueryParameter.Identifier, value);
-        }
-
-        if (website != null && website.Any())
-        {
-            var hosts = website.Where(UriUtility.IsValid).Select(u => new Uri(u).Host.ToLowerInvariant()).Distinct();
-
-            if (hosts.Any(h =>
-                    DomainName.TryParse(h, out var domain) &&
-                    string.Equals(domain.TLD, "no", StringComparison.InvariantCultureIgnoreCase)))
-                namePostFixFilter = value => false;
-        }
-
-        if (name != null && name.Any())
-        {
-            var values = name;
-
-            foreach (var value in values.Where(v => !NameFilter(v) && !namePostFixFilter(v)))
-                yield return new ExternalSearchQuery(this, entityType, ExternalSearchQueryParameter.Name, value);
-        }
-    }
-
-    public override IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context,
-        IExternalSearchQuery query)
-    {
-        var client = new RestClient("http://data.brreg.no/enhetsregisteret");
-        RestRequest request;
-
-        if (query.QueryParameters.ContainsKey(ExternalSearchQueryParameter.Identifier))
-        {
-            var id = query.QueryParameters[ExternalSearchQueryParameter.Identifier].FirstOrDefault();
-
-            request = new RestRequest($"api/enheter/{id}", Method.GET)
-            {
-                OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
-            };
-
-            var response = client.Execute<BrregOrganization>(request);
-
-            switch (response.StatusCode)
-            {
-                case HttpStatusCode.OK:
-                {
-                    if (response.Data != null)
-                    {
-                        var org = response.Data;
-
-                        if (org.BrregNumber == 0 && string.IsNullOrEmpty(org.Name))
-                            yield break;
-
-                        yield return new ExternalSearchQueryResult<BrregOrganization>(query, org);
-                    }
-
-                    break;
-                }
-                case HttpStatusCode.NoContent:
-                case HttpStatusCode.NotFound:
-                    yield break;
-                default:
-                {
-                    if (response.ErrorException != null)
-                        throw new AggregateException(response.ErrorException.Message, response.ErrorException);
-                    throw new ApplicationException("Could not execute external search query - StatusCode:" +
-                                                   response.StatusCode + "; Content: " + response.Content);
-                }
-            }
-        }
-
-        if (query.QueryParameters.ContainsKey(ExternalSearchQueryParameter.Name))
-        {
-            var name = query.QueryParameters[ExternalSearchQueryParameter.Name].FirstOrDefault();
-            if (!string.IsNullOrEmpty(name))
-            {
-                request = new RestRequest($"enhet.json?page=0&size=30&$filter=startswith%28navn%2C%27{name}%27%29",
-                    Method.GET)
-                {
-                    OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
-                };
-
-                var response = client.Execute<RootBrregOrganization>(request);
-
-                switch (response.StatusCode)
-                {
-                    case HttpStatusCode.OK:
-                    {
-                        if (response.Data?.Data != null)
-                            foreach (var org in response.Data.Data)
-                            {
-                                if (org.BrregNumber == 0 && string.IsNullOrEmpty(org.Name))
-                                    continue;
-
-                                yield return new ExternalSearchQueryResult<BrregOrganization>(query, org);
-                            }
-
-                        break;
-                    }
-                    case HttpStatusCode.NoContent:
-                    case HttpStatusCode.NotFound:
-                        yield break;
-                    default:
-                    {
-                        if (response.ErrorException != null)
-                            throw new AggregateException(response.ErrorException.Message, response.ErrorException);
-                        throw new ApplicationException("Could not execute external search query - StatusCode:" +
-                                                       response.StatusCode + "; Content: " + response.Content);
-                    }
-                }
-            }
-        }
-    }
-
-    public override IEnumerable<Clue> BuildClues(ExecutionContext context, IExternalSearchQuery query,
-        IExternalSearchQueryResult result, IExternalSearchRequest request)
-    {
-        var resultItem = result.As<BrregOrganization>();
-
-        if (resultItem.Data.BrregNumber == 0)
-            return null;
-
-        var code = GetOriginEntityCode(resultItem);
-
-        var clue = new Clue(code, context.Organization);
-
-        PopulateMetadata(clue.Data.EntityData, resultItem);
-
-        return new[] { clue };
-    }
+    public AuthMethods AuthMethods { get; } = BrregConstants.AuthMethods;
+    public IntegrationType Type { get; } = BrregConstants.IntegrationType;
 
     public override IEntityMetadata GetPrimaryEntityMetadata(ExecutionContext context,
         IExternalSearchQueryResult result, IExternalSearchRequest request)
     {
-        var resultItem = result.As<BrregOrganization>();
-        return CreateMetadata(resultItem);
-    }
+        var metadata = new EntityMetadataPart
+        {
+            EntityType = request.EntityMetaData.EntityType,
+            OriginEntityCode = request.EntityMetaData.OriginEntityCode
+        };
 
-    public override IPreviewImage GetPrimaryEntityPreviewImage(
-        ExecutionContext context,
-        IExternalSearchQueryResult result,
-        IExternalSearchRequest request)
-    {
-        return null;
-    }
+        metadata.Codes.Add(metadata.OriginEntityCode);
+        metadata.Codes.Add(request.EntityMetaData.OriginEntityCode);
 
-    private IEntityMetadata CreateMetadata(IExternalSearchQueryResult<BrregOrganization> resultItem)
-    {
-        var metadata = new EntityMetadataPart();
+        metadata.Name = request.EntityMetaData.Name;
+        metadata.EntityType = request.EntityMetaData.EntityType;
 
-        PopulateMetadata(metadata, resultItem);
+        PopulateMetadata(metadata, result.As<BrregOrganization>());
 
         return metadata;
     }
 
-    private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<BrregOrganization> resultItem)
+    private void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<BrregOrganization> resultItem)
     {
-        return new EntityCode(EntityType.Organization, GetCodeOrigin(), resultItem.Data.BrregNumber);
-    }
+        // metadata.EntityType = EntityType.Organization;
+        metadata.DisplayName = resultItem.Data.Navn;
 
-    private CodeOrigin GetCodeOrigin()
-    {
-        return CodeOrigin.CluedIn.CreateSpecific("brreg");
-    }
-
-    public void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<BrregOrganization> resultItem)
-    {
-        var code = GetOriginEntityCode(resultItem);
-
-        metadata.EntityType = EntityType.Organization;
-        metadata.Name = resultItem.Data.Name;
-        metadata.OriginEntityCode = code;
-
-        metadata.Codes.Add(code);
-
-        Uri uri = null;
-
-        if (!string.IsNullOrEmpty(resultItem.Data.Links) &&
-            BrregExternalSearchProviderUtil.IsJson(resultItem.Data.Links))
-        {
-            if (BrregExternalSearchProviderUtil.CanDeserializeTo<SelfLink>(resultItem.Data.Links))
-            {
-                var selfLink = JsonUtility.Deserialize<SelfLink>(resultItem.Data.Links);
-
-                if (selfLink.Self.Href != null)
-                    uri = new Uri(selfLink.Self.Href);
-            }
-            else if (BrregExternalSearchProviderUtil.CanDeserializeTo<List<Link>>(resultItem.Data.Links))
-            {
-                var linkList = JsonUtility.Deserialize<List<Link>>(resultItem.Data.Links);
-
-                var link = linkList?.FirstOrDefault(p => p.Rel == "self");
-
-                if (link != null)
-                    uri = new Uri(link.Href);
-            }
-        }
-
-        if (uri != null)
-            metadata.Uri = uri;
-
-        metadata.Properties[BrregVocabulary.Organization.BrregNumber] = resultItem.Data.BrregNumber.PrintIfAvailable();
-        metadata.Properties[BrregVocabulary.Organization.FoundedDate] = resultItem.Data.FoundedDate.PrintIfAvailable();
+        metadata.Properties[BrregVocabulary.Organization.BrregNumber] =
+            resultItem.Data.Organisasjonsnummer.PrintIfAvailable();
+        metadata.Properties[BrregVocabulary.Organization.FoundedDate] =
+            resultItem.Data.Stiftelsesdato.PrintIfAvailable();
         metadata.Properties[BrregVocabulary.Organization.RegistrationDate] =
-            resultItem.Data.RegistrationDate.PrintIfAvailable();
-        metadata.Properties[BrregVocabulary.Organization.OrganizationType] =
-            resultItem.Data.OrganisationType.PrintIfAvailable();
-
-        if (resultItem.Data.OrganisationType != null &&
-            BrregExternalSearchProviderUtil.IsJson(resultItem.Data.OrganisationType))
-        {
-            var fullValue = JsonUtility.Deserialize<OrganizationType>(resultItem.Data.OrganisationType);
-
-            metadata.Properties[BrregVocabulary.Organization.OrganizationTypeFull] = fullValue.FullNameForCode;
-            metadata.Properties[BrregVocabulary.Organization.OrganizationType] = fullValue.Code;
-        }
-        else
-        {
-            metadata.Properties[BrregVocabulary.Organization.OrganizationType] =
-                resultItem.Data.OrganisationType.PrintIfAvailable();
-        }
-
-        if (resultItem.Data.PostAddress != null)
-            PopulateAddress(metadata, BrregVocabulary.Organization.Address, resultItem.Data.PostAddress);
-
-        if (resultItem.Data.BusinessAddress != null && resultItem.Data.BusinessAddress != resultItem.Data.PostAddress)
-            PopulateAddress(metadata, BrregVocabulary.Organization.BusinessAddress, resultItem.Data.BusinessAddress);
+            resultItem.Data.RegistreringsdatoEnhetsregisteret.PrintIfAvailable();
 
         metadata.Properties[BrregVocabulary.Organization.OrganizationTypeFull] =
-            resultItem.Data.OrganisationType.PrintIfAvailable();
+            resultItem.Data.Organisasjonsform.Beskrivelse.PrintIfAvailable();
+        metadata.Properties[BrregVocabulary.Organization.OrganizationType] =
+            resultItem.Data.Organisasjonsform.Kode.PrintIfAvailable();
+
+
+        // TODO: Save both addresses
+        if (resultItem.Data.Postadresse != null)
+            PopulateAddress(metadata, BrregVocabulary.Organization.Address, resultItem.Data.Postadresse);
+        else
+            PopulateAddress(metadata, BrregVocabulary.Organization.BusinessAddress, resultItem.Data.Forretningsadresse);
+
+        metadata.Properties[BrregVocabulary.Organization.OrganizationTypeFull] =
+            resultItem.Data.Organisasjonsform.PrintIfAvailable();
         metadata.Properties[BrregVocabulary.Organization.VoluntaryRegistered] =
-            resultItem.Data.VoluntaryRegisteredBool.PrintIfAvailable();
+            resultItem.Data.RegistrertIFrivillighetsregisteret.PrintIfAvailable();
         metadata.Properties[BrregVocabulary.Organization.RegisteredImGoodsRegister] =
-            resultItem.Data.RegistredImGoodsRegisterBool.PrintIfAvailable();
-        metadata.Properties[BrregVocabulary.Organization.RegisteredBusinessRegister] =
-            resultItem.Data.RegistredImGoodsRegisterBool.PrintIfAvailable();
-        metadata.Properties[BrregVocabulary.Organization.RegisteredFoundingRegister] =
-            resultItem.Data.RegisteredFoundingRegisterBool.PrintIfAvailable();
+            resultItem.Data.RegistrertIMvaregisteret.PrintIfAvailable();
+        // TODO: ROK: Add these properties
+        // metadata.Properties[BrregVocabulary.Organization.RegisteredBusinessRegister] =
+        //      resultItem.Data.RegistredImGoodsRegisterBool.PrintIfAvailable();
+        // metadata.Properties[BrregVocabulary.Organization.RegisteredFoundingRegister] =
+        //     resultItem.Data.RegisteredFoundingRegisterBool.PrintIfAvailable();
         metadata.Properties[BrregVocabulary.Organization.NumberEmployees] =
-            resultItem.Data.NumberEmployees.PrintIfAvailable();
-        metadata.Properties[BrregVocabulary.Organization.BankruptBool] =
-            resultItem.Data.BankruptBool.PrintIfAvailable();
-        metadata.Properties[BrregVocabulary.Organization.UnderLiquidation] =
-            resultItem.Data.UnderLiquidationBool.PrintIfAvailable();
-        metadata.Properties[BrregVocabulary.Organization.UnderLiquidationOrDissolution] =
-            resultItem.Data.UnderLiquidationOrDissolutionBool.PrintIfAvailable();
-        metadata.Properties[BrregVocabulary.Organization.BrregUrl] = uri.PrintIfAvailable();
+            resultItem.Data.AntallAnsatte.PrintIfAvailable();
+        // metadata.Properties[BrregVocabulary.Organization.BankruptBool] =
+        //     resultItem.Data.BankruptBool.PrintIfAvailable();
+        // metadata.Properties[BrregVocabulary.Organization.UnderLiquidation] =
+        //     resultItem.Data.UnderLiquidationBool.PrintIfAvailable();
+        // metadata.Properties[BrregVocabulary.Organization.UnderLiquidationOrDissolution] =
+        //     resultItem.Data.UnderLiquidationOrDissolutionBool.PrintIfAvailable();
+        // metadata.Properties[BrregVocabulary.Organization.BrregUrl] = uri.PrintIfAvailable();
         metadata.Properties[BrregVocabulary.Organization.IndustryCode] =
-            resultItem.Data.IndustryCode1?.Code.PrintIfAvailable();
+            resultItem.Data.Naeringskode1?.Kode.PrintIfAvailable();
         metadata.Properties[BrregVocabulary.Organization.IndustryDescription] =
-            resultItem.Data.IndustryCode1?.Description.PrintIfAvailable();
+            resultItem.Data.Naeringskode1?.Beskrivelse.PrintIfAvailable();
         metadata.Properties[BrregVocabulary.Organization.InstitutionSectorCode] =
-            resultItem.Data.InstitutionSectorCode?.Code.PrintIfAvailable();
+            resultItem.Data.InstitusjonellSektorkode?.Kode.PrintIfAvailable();
         metadata.Properties[BrregVocabulary.Organization.InstitutionSectorDescription] =
-            resultItem.Data.InstitutionSectorCode?.Description.PrintIfAvailable();
+            resultItem.Data.InstitusjonellSektorkode?.Beskrivelse.PrintIfAvailable();
         metadata.Properties[BrregVocabulary.Organization.LanguageVariant] =
-            resultItem.Data.LanguageVariant.PrintIfAvailable();
+            resultItem.Data.Maalform.PrintIfAvailable();
         metadata.Properties[BrregVocabulary.Organization.LatestFiledAnnualAccounts] =
-            resultItem.Data.LatestFiledAnnualAccounts.PrintIfAvailable();
-        metadata.Properties[BrregVocabulary.Organization.Website] = resultItem.Data.Website.PrintIfAvailable();
+            resultItem.Data.SisteInnsendteAarsregnskap.PrintIfAvailable();
+        metadata.Properties[BrregVocabulary.Organization.Website] = resultItem.Data.Hjemmeside.PrintIfAvailable();
     }
 
     private static void PopulateAddress(IEntityMetadata metadata, BrregAddressVocabulary vocabulary,
-        PostAddress address)
+        Postadresse address)
     {
-        metadata.Properties[vocabulary.CountryCode] = address.CountryCode.PrintIfAvailable();
-        metadata.Properties[vocabulary.PostalCode] = address.PostalCode.PrintIfAvailable();
-        metadata.Properties[vocabulary.Country] = address.Country.PrintIfAvailable();
-        metadata.Properties[vocabulary.Municipality] = address.Municipality.PrintIfAvailable();
-        metadata.Properties[vocabulary.MunicipalityNumber] = address.MunicipalityNumber.PrintIfAvailable();
+        metadata.Properties[vocabulary.CountryCode] = address.Landkode.PrintIfAvailable();
+        metadata.Properties[vocabulary.PostalCode] = address.Postnummer.PrintIfAvailable();
+        metadata.Properties[vocabulary.Country] = address.Land.PrintIfAvailable();
+        metadata.Properties[vocabulary.Municipality] = address.Kommunenummer.PrintIfAvailable();
+        metadata.Properties[vocabulary.MunicipalityNumber] = address.Kommunenummer.PrintIfAvailable();
         metadata.Properties[vocabulary.Address] =
-            address.Address.PrintIfAvailable(v => string.Join(Environment.NewLine, v));
-        metadata.Properties[vocabulary.PostalArea] = address.PostalArea.PrintIfAvailable();
+            address.Adresse.PrintIfAvailable(v => string.Join(Environment.NewLine, v));
+        metadata.Properties[vocabulary.PostalArea] = address.Poststed.PrintIfAvailable();
     }
 }

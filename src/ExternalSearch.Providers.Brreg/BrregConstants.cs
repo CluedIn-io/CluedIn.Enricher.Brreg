@@ -1,9 +1,8 @@
-﻿using CluedIn.Core.Data.Relational;
-using CluedIn.Core.Providers;
+﻿using CluedIn.Core.Providers;
 
 namespace CluedIn.ExternalSearch.Providers.Brreg;
 
-public static class Constants
+public static class BrregConstants
 {
     public const string ComponentName = "Brreg";
     public const string ProviderName = "Brreg";
@@ -11,7 +10,7 @@ public static class Constants
 
     public static string About { get; set; } = "Brreg is an enricher which provides information on Norwegian companies";
     public static string Icon { get; set; } = "Resources.brreg_logo.svg";
-    public static string Domain { get; set; } = "https://www.brreg.no/";
+    public static string Domain { get; set; } = "https://brreg.no/";
 
     public static AuthMethods AuthMethods => new()
     {
@@ -19,45 +18,42 @@ public static class Constants
         {
             new Control
             {
-                name = nameof(BrregExternalSearchJobData.AcceptedEntityType),
+                name = nameof(BrregJobData.AcceptedEntityType),
                 displayName = "Entity Type",
                 type = "text",
                 isRequired = true
             },
             new Control
             {
-                name = nameof(BrregExternalSearchJobData.CountryCodeKey),
-                displayName = "Country Code",
+                name = nameof(BrregJobData.OrganizationNameVocabularyKey),
+                displayName = "Organization Name Vocabulary Key",
                 type = "text",
                 isRequired = true
             },
             new Control
             {
-                name = nameof(BrregExternalSearchJobData.WebsiteKey),
-                displayName = "Website",
+                name = nameof(BrregJobData.CountryCodeVocabularyKey),
+                displayName = "Country Code Vocabulary Key",
                 type = "text",
                 isRequired = true
             },
             new Control
             {
-                name = nameof(BrregExternalSearchJobData.BrregIdKey),
-                displayName = "Organization Number",
+                name = nameof(BrregJobData.BrregIdVocabularyKey),
+                displayName = "Organization Number Vocabulary Key",
                 type = "text",
                 isRequired = true
             }
         }
     };
 
-    public static IEnumerable<Control> Properties { get; set; } = new List<Control>();
-
-    public static Guide Guide { get; set; } = null;
     public static IntegrationType IntegrationType { get; set; } = IntegrationType.Enrichment;
 
     public struct KeyName
     {
         public const string AcceptedEntityType = nameof(AcceptedEntityType);
+        public const string OrganizationNameKey = nameof(OrganizationNameKey);
         public const string CountryCodeKey = nameof(CountryCodeKey);
-        public const string WebsiteKey = nameof(WebsiteKey);
         public const string BrregIdKey = nameof(BrregIdKey);
     }
 }
