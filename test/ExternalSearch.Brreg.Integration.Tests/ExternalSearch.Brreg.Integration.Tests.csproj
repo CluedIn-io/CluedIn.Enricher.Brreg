@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
-        <PackageReference Include="CluedIn.Testing.Base"/>
-    </ItemGroup>
-    <ItemGroup>
         <ProjectReference Include="..\..\src\ExternalSearch.Providers.Brreg\ExternalSearch.Providers.Brreg.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit"/>
     </ItemGroup>
 </Project>
