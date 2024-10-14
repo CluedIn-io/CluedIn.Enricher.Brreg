@@ -205,6 +205,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             var clue = new Clue(code, context.Organization);
 
             PopulateMetadata(clue.Data.EntityData, resultItem);
+            clue.Data.EntityData.Codes.Add(request.EntityMetaData.OriginEntityCode);
 
             return new[] { clue };
         }
