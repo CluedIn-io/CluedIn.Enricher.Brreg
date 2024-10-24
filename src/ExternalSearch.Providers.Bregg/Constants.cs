@@ -23,7 +23,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                 {
                     displayName = "Accepted Entity Type",
                     type = "input",
-                    isRequired = false,
+                    isRequired = true,
                     name = nameof(BrregExternalSearchJobData.AcceptedEntityType)
                 },
                 new()
