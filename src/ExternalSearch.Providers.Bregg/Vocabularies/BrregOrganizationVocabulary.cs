@@ -37,8 +37,8 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Vocabularies
                 BankruptBool                       = group.Add(new VocabularyKey("bankrupt",                           VocabularyKeyDataType.Boolean));
                 UnderLiquidation                   = group.Add(new VocabularyKey("underLiquidation",                   VocabularyKeyDataType.Boolean));
                 UnderLiquidationOrDissolution      = group.Add(new VocabularyKey("underLiquidationOrDissolution",      VocabularyKeyDataType.Boolean));
-                LatestFiledAnnualAccounts          = group.Add(new VocabularyKey("latestFiledAnnualAccounts",          VocabularyKeyDataType.Boolean));
-                LanguageVariant                    = group.Add(new VocabularyKey("languageVariant",                    VocabularyKeyDataType.Boolean));
+                LatestFiledAnnualAccounts          = group.Add(new VocabularyKey("latestFiledAnnualAccounts",          VocabularyKeyDataType.Text));
+                LanguageVariant                    = group.Add(new VocabularyKey("languageVariant",                    VocabularyKeyDataType.Text));
                 BrregUrl                           = group.Add(new VocabularyKey("brregUrl",                           VocabularyKeyDataType.Uri));
                 Website                            = group.Add(new VocabularyKey("website",                            VocabularyKeyDataType.Uri));
             });
