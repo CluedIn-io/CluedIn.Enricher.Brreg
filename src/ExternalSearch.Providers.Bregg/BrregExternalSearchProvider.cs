@@ -194,7 +194,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                 var name = query.QueryParameters[ExternalSearchQueryParameter.Name].FirstOrDefault();
                 if (!string.IsNullOrEmpty(name))
                 {
-                    request = new RestRequest($"enhet.json?page=0&size=30&$filter=startswith%28navn%2C%27{name}%27%29", Method.GET) {
+                    request = new RestRequest($"api/enheter?page=0&size=30&navn={name}", Method.GET) {
                         OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
                     };
 
@@ -204,9 +204,10 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                     {
                         case HttpStatusCode.OK:
                         {
-                            if (response.Data?.Data != null)
+                            if (response.Data?.Embedded?.Data != null)
                             {
-                                foreach (var org in response.Data.Data)
+                                var filterResponse = response.Data.Embedded.Data.Where(e => e.Name.StartsWith(name, StringComparison.InvariantCultureIgnoreCase));
+                                foreach (var org in filterResponse)
                                 {
                                     if (org.BrregNumber == 0 && string.IsNullOrEmpty(org.Name))
                                         continue;
