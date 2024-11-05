@@ -5,8 +5,8 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class RootBrregOrganization
 	{
-		[DeserializeAs(Name = "data")]
-		public List<BrregOrganization> Data { get; set; }
+		[DeserializeAs(Name = "_embedded")]
+		public Unit Embedded { get; set; }
 
 		[DeserializeAs(Name = "links")]
 		public List<Link> Links { get; set; }
