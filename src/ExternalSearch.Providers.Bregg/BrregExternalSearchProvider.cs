@@ -243,12 +243,6 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             var clue = new Clue(request.EntityMetaData.OriginEntityCode, context.Organization);
             PopulateMetadata(clue.Data.EntityData, resultItem, request, config);
 
-            var jobData = new BrregExternalSearchJobData(config);
-            if (!jobData.SkipEntityCodeCreation)
-            {
-                clue.Data.EntityData.Codes.Add(GetOriginEntityCode(resultItem, request));
-            }
-
             return new[] { clue };
         }
 
@@ -297,7 +291,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         public void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request, IDictionary<string, object> config)
         {
             var jobData = new BrregExternalSearchJobData(config);
-            var code = jobData.SkipEntityCodeCreation ? request.EntityMetaData.OriginEntityCode : GetOriginEntityCode(resultItem, request);
+            var code = request.EntityMetaData.OriginEntityCode;
 
             metadata.EntityType       = request.EntityMetaData.EntityType;
             metadata.Name             = request.EntityMetaData.Name;
@@ -305,7 +299,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
             if (!jobData.SkipEntityCodeCreation)
             {
-                metadata.Codes.Add(code);
+                metadata.Codes.Add(GetOriginEntityCode(resultItem, request));
             }
 
             Uri uri = null;
