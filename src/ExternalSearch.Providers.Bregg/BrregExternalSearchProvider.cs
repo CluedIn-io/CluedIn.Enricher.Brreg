@@ -240,12 +240,14 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             if (resultItem.Data.BrregNumber == 0)
                 return null;
 
-            var code = GetOriginEntityCode(resultItem, request);
+            var clue = new Clue(request.EntityMetaData.OriginEntityCode, context.Organization);
+            PopulateMetadata(clue.Data.EntityData, resultItem, request, config);
 
-            var clue = new Clue(code, context.Organization);
-
-            PopulateMetadata(clue.Data.EntityData, resultItem, request);
-            clue.Data.EntityData.Codes.Add(request.EntityMetaData.OriginEntityCode);
+            var jobData = new BrregExternalSearchJobData(config);
+            if (!jobData.SkipEntityCodeCreation)
+            {
+                clue.Data.EntityData.Codes.Add(GetOriginEntityCode(resultItem, request));
+            }
 
             return new[] { clue };
         }
@@ -253,7 +255,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         public IEntityMetadata GetPrimaryEntityMetadata(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
         {
             var resultItem = result.As<BrregOrganization>();
-            return CreateMetadata(resultItem, request);
+            return CreateMetadata(resultItem, request, config);
         }
 
         public override IPreviewImage GetPrimaryEntityPreviewImage(
@@ -273,11 +275,11 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             return null;
         }
 
-        private IEntityMetadata CreateMetadata(IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request)
+        private IEntityMetadata CreateMetadata(IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request, IDictionary<string, object> config)
         {
             var metadata = new EntityMetadataPart();
 
-            PopulateMetadata(metadata, resultItem, request);
+            PopulateMetadata(metadata, resultItem, request, config);
 
             return metadata;
         }
@@ -292,15 +294,19 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             return CodeOrigin.CluedIn.CreateSpecific("brreg");
         }
 
-        public void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request)
+        public void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request, IDictionary<string, object> config)
         {
-            var code = GetOriginEntityCode(resultItem, request);
+            var jobData = new BrregExternalSearchJobData(config);
+            var code = jobData.SkipEntityCodeCreation ? request.EntityMetaData.OriginEntityCode : GetOriginEntityCode(resultItem, request);
 
             metadata.EntityType       = request.EntityMetaData.EntityType;
             metadata.Name             = request.EntityMetaData.Name;
-            metadata.OriginEntityCode = code;
+            metadata.OriginEntityCode = jobData.SkipEntityCodeCreation ? request.EntityMetaData.OriginEntityCode : code;
 
-            metadata.Codes.Add(code);
+            if (!jobData.SkipEntityCodeCreation)
+            {
+                metadata.Codes.Add(code);
+            }
 
             Uri uri = null;
 
