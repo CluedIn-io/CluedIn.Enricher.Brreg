@@ -301,7 +301,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
             metadata.EntityType       = request.EntityMetaData.EntityType;
             metadata.Name             = request.EntityMetaData.Name;
-            metadata.OriginEntityCode = jobData.SkipEntityCodeCreation ? request.EntityMetaData.OriginEntityCode : code;
+            metadata.OriginEntityCode = code;
 
             if (!jobData.SkipEntityCodeCreation)
             {
