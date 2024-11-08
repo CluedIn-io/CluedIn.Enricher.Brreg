@@ -53,6 +53,13 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                     type = "input",
                     isRequired = false,
                     name = nameof(BrregExternalSearchJobData.BrregCodeVocabularyKey)
+                },
+                new()
+                {
+                    displayName = "Skip Entity Code Creation (Brreg Code)",
+                    type = "checkbox",
+                    isRequired = false,
+                    name =  nameof(BrregExternalSearchJobData.SkipEntityCodeCreation),
                 }
             }
         };

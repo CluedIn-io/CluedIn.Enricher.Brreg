@@ -12,6 +12,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             CountryCodeVocabularyKey = GetValue(configuration, nameof(CountryCodeVocabularyKey), default(string));
             WebsiteVocabularyKey = GetValue(configuration, nameof(WebsiteVocabularyKey), default(string));
             BrregCodeVocabularyKey = GetValue(configuration, nameof(BrregCodeVocabularyKey), default(string));
+            SkipEntityCodeCreation = GetValue(configuration, nameof(SkipEntityCodeCreation), default(bool));
         }
 
         public IDictionary<string, object> ToDictionary()
@@ -23,7 +24,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                 { nameof(CountryCodeVocabularyKey), CountryCodeVocabularyKey },
                 { nameof(WebsiteVocabularyKey), WebsiteVocabularyKey },
                 { nameof(BrregCodeVocabularyKey), BrregCodeVocabularyKey },
-
+                { nameof(SkipEntityCodeCreation), SkipEntityCodeCreation },
             };
         }
 
@@ -32,5 +33,6 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         public string CountryCodeVocabularyKey { get; set; }
         public string WebsiteVocabularyKey { get; set; }
         public string BrregCodeVocabularyKey { get; set; }
+        public bool SkipEntityCodeCreation { get; set; }
     }
 }
