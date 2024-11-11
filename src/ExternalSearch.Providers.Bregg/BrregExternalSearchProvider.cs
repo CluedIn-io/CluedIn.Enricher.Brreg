@@ -20,9 +20,11 @@ using CluedIn.Core.ExternalSearch;
 using CluedIn.Core.Providers;
 using CluedIn.Crawling.Helpers;
 using CluedIn.ExternalSearch.Filters;
+using CluedIn.ExternalSearch.Provider;
 using CluedIn.ExternalSearch.Providers.Bregg.Models;
 using CluedIn.ExternalSearch.Providers.Bregg.Net;
 using CluedIn.ExternalSearch.Providers.Bregg.Vocabularies;
+using CluedIn.Processing.EntityResolution;
 using RestSharp;
 using EntityType = CluedIn.Core.Data.EntityType;
 
@@ -32,7 +34,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
     /// <seealso cref="CluedIn.ExternalSearch.ExternalSearchProviderBase" />
     public class BrregExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider
     {
-        private static readonly EntityType[] AcceptedEntityTypes = { EntityType.Organization };
+        private static readonly EntityType[] DefaultAcceptedEntityTypes = { EntityType.Organization };
 
         /**********************************************************************************************************
          * CONSTRUCTORS
@@ -40,7 +42,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
             /// <summary>Initializes a new instance of the <see cref="BrregExternalSearchProvider"/> class.</summary>
         public BrregExternalSearchProvider()
-            : base(Constants.ProviderId, AcceptedEntityTypes)
+            : base(Constants.ProviderId, DefaultAcceptedEntityTypes)
         {
         }
 
@@ -48,9 +50,31 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
          * METHODS
          **********************************************************************************************************/
 
-        public override IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request)
+        public IEnumerable<EntityType> Accepts(IDictionary<string, object> config, IProvider provider) => this.Accepts(config);
+
+        private IEnumerable<EntityType> Accepts(IDictionary<string, object> config)
         {
-            if (!Accepts(request.EntityMetaData.EntityType))
+            if (config != null)
+            {
+                var breggExternalSearchJobData = new BrregExternalSearchJobData(config);
+                if (!string.IsNullOrWhiteSpace(breggExternalSearchJobData.AcceptedEntityType))
+                    return new EntityType[] { breggExternalSearchJobData.AcceptedEntityType };
+            }
+
+            // Fallback to default accepted entity types
+            return DefaultAcceptedEntityTypes;
+        }
+
+        private bool Accepts(IDictionary<string, object> config, EntityType entityTypeToEvaluate)
+        {
+            var configurableAcceptedEntityTypes = this.Accepts(config).ToArray();
+
+            return configurableAcceptedEntityTypes.Any(entityTypeToEvaluate.Is);
+        }
+
+        public IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
+        {
+            if (!this.Accepts(config, request.EntityMetaData.EntityType))
                 yield break;
 
             var existingResults = request.GetQueryResults<BrregOrganization>(this).ToList();
@@ -64,9 +88,20 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             // Query Input.
             var entityType = request.EntityMetaData.EntityType;
 
-            var name        = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.OrganizationName, new HashSet<string>());
+            var breggExternalSearchJobData = new BrregExternalSearchJobData(config);
+
+            var name = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.OrganizationName, new HashSet<string>());
             var countryCode = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressCountryCode, new HashSet<string>());
-            var website     = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Website, new HashSet<string>());
+            var website = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Website, new HashSet<string>());
+
+            if (!string.IsNullOrWhiteSpace(breggExternalSearchJobData.NameVocabularyKey))
+                name = request.QueryParameters.GetValue<string, HashSet<string>>(breggExternalSearchJobData.NameVocabularyKey, new HashSet<string>());
+
+            if (!string.IsNullOrWhiteSpace(breggExternalSearchJobData.CountryCodeVocabularyKey))
+                countryCode = request.QueryParameters.GetValue<string, HashSet<string>>(breggExternalSearchJobData.CountryCodeVocabularyKey, new HashSet<string>());
+
+            if (!string.IsNullOrWhiteSpace(breggExternalSearchJobData.WebsiteVocabularyKey))
+                website = request.QueryParameters.GetValue<string, HashSet<string>>(breggExternalSearchJobData.WebsiteVocabularyKey, new HashSet<string>());
 
             bool CountryFilter(string c) => c.Equals("no", StringComparison.OrdinalIgnoreCase)
                                          || c.Equals("NOR", StringComparison.OrdinalIgnoreCase)
@@ -81,6 +116,10 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             }
 
             var brregId = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.CodesBrreg, new HashSet<string>());
+
+            if (!string.IsNullOrWhiteSpace(breggExternalSearchJobData.BrregCodeVocabularyKey))
+                brregId = request.QueryParameters.GetValue<string, HashSet<string>>(breggExternalSearchJobData.BrregCodeVocabularyKey, new HashSet<string>());
+
             if (brregId != null && brregId.Any())
             {
                 var values = brregId;
@@ -106,7 +145,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             }
         }
 
-        public override IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query)
+        public IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query, IDictionary<string, object> config, IProvider provider)
         {
             var client = new RestClient("http://data.brreg.no/enhetsregisteret");
             RestRequest request;
@@ -155,7 +194,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                 var name = query.QueryParameters[ExternalSearchQueryParameter.Name].FirstOrDefault();
                 if (!string.IsNullOrEmpty(name))
                 {
-                    request = new RestRequest($"enhet.json?page=0&size=30&$filter=startswith%28navn%2C%27{name}%27%29", Method.GET) {
+                    request = new RestRequest($"api/enheter?page=0&size=30&navn={name}", Method.GET) {
                         OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
                     };
 
@@ -165,9 +204,10 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                     {
                         case HttpStatusCode.OK:
                         {
-                            if (response.Data?.Data != null)
+                            if (response.Data?.Embedded?.Data != null)
                             {
-                                foreach (var org in response.Data.Data)
+                                var filterResponse = response.Data.Embedded.Data.Where(e => e.Name.StartsWith(name, StringComparison.InvariantCultureIgnoreCase));
+                                foreach (var org in filterResponse)
                                 {
                                     if (org.BrregNumber == 0 && string.IsNullOrEmpty(org.Name))
                                         continue;
@@ -193,26 +233,23 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             }
         }
 
-        public override IEnumerable<Clue> BuildClues(ExecutionContext context, IExternalSearchQuery query, IExternalSearchQueryResult result, IExternalSearchRequest request)
+        public IEnumerable<Clue> BuildClues(ExecutionContext context, IExternalSearchQuery query, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
         {
             var resultItem = result.As<BrregOrganization>();
 
             if (resultItem.Data.BrregNumber == 0)
                 return null;
 
-            var code = GetOriginEntityCode(resultItem);
-
-            var clue = new Clue(code, context.Organization);
-
-            PopulateMetadata(clue.Data.EntityData, resultItem);
+            var clue = new Clue(request.EntityMetaData.OriginEntityCode, context.Organization);
+            PopulateMetadata(clue.Data.EntityData, resultItem, request, config);
 
             return new[] { clue };
         }
 
-        public override IEntityMetadata GetPrimaryEntityMetadata(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request)
+        public IEntityMetadata GetPrimaryEntityMetadata(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
         {
             var resultItem = result.As<BrregOrganization>();
-            return CreateMetadata(resultItem);
+            return CreateMetadata(resultItem, request, config);
         }
 
         public override IPreviewImage GetPrimaryEntityPreviewImage(
@@ -220,21 +257,30 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             IExternalSearchQueryResult result,
             IExternalSearchRequest request)
         {
+            // Note: This needs to be cleaned up, but since config and provider is not used in GetPrimaryEntityMetadata this is fine.
+            var dummyConfig = new Dictionary<string, object>();
+            var dummyProvider = new DefaultExternalSearchProviderProvider(context.ApplicationContext, this);
+
+            return GetPrimaryEntityPreviewImage(context, result, request, dummyConfig, dummyProvider);
+        }
+
+        public IPreviewImage GetPrimaryEntityPreviewImage(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
+        {
             return null;
         }
 
-        private IEntityMetadata CreateMetadata(IExternalSearchQueryResult<BrregOrganization> resultItem)
+        private IEntityMetadata CreateMetadata(IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request, IDictionary<string, object> config)
         {
             var metadata = new EntityMetadataPart();
 
-            PopulateMetadata(metadata, resultItem);
+            PopulateMetadata(metadata, resultItem, request, config);
 
             return metadata;
         }
 
-        private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<BrregOrganization> resultItem)
+        private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request)
         {
-            return new EntityCode(EntityType.Organization, GetCodeOrigin(), resultItem.Data.BrregNumber);
+            return new EntityCode(request.EntityMetaData.EntityType, GetCodeOrigin(), resultItem.Data.BrregNumber);
         }
 
         private CodeOrigin GetCodeOrigin()
@@ -242,15 +288,19 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             return CodeOrigin.CluedIn.CreateSpecific("brreg");
         }
 
-        public void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<BrregOrganization> resultItem)
+        public void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request, IDictionary<string, object> config)
         {
-            var code = GetOriginEntityCode(resultItem);
+            var jobData = new BrregExternalSearchJobData(config);
+            var code = request.EntityMetaData.OriginEntityCode;
 
-            metadata.EntityType       = EntityType.Organization;
-            metadata.Name             = resultItem.Data.Name;
+            metadata.EntityType       = request.EntityMetaData.EntityType;
+            metadata.Name             = request.EntityMetaData.Name;
             metadata.OriginEntityCode = code;
 
-            metadata.Codes.Add(code);
+            if (!jobData.SkipEntityCodeCreation)
+            {
+                metadata.Codes.Add(GetOriginEntityCode(resultItem, request));
+            }
 
             Uri uri = null;
 
@@ -328,35 +378,12 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             metadata.Properties[vocabulary.PostalArea]         = address.PostalArea.PrintIfAvailable();
         }
 
-        public IEnumerable<EntityType> Accepts(IDictionary<string, object> config, IProvider provider)
-        {
-            return AcceptedEntityTypes;
-        }
-
-        public IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
-        {
-            return BuildQueries(context, request);
-        }
-
-        public IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query, IDictionary<string, object> config, IProvider provider)
-        {
-            return ExecuteSearch(context, query);
-        }
-
-        public IEnumerable<Clue> BuildClues(ExecutionContext context, IExternalSearchQuery query, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
-        {
-            return BuildClues(context, query, result, request);
-        }
-
-        public IEntityMetadata GetPrimaryEntityMetadata(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
-        {
-            return GetPrimaryEntityMetadata(context, result, request);
-        }
-
-        public IPreviewImage GetPrimaryEntityPreviewImage(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
-        {
-            return GetPrimaryEntityPreviewImage(context, result, request);
-        }
+        // Since this is a configurable external search provider, theses methods should never be called
+        public override IEnumerable<IExternalSearchQuery> BuildQueries(ExecutionContext context, IExternalSearchRequest request) => BuildQueries(context, request, null, null).AsEnumerable();
+        public override bool Accepts(EntityType entityType) => throw new NotSupportedException();
+        public override IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query) => throw new NotSupportedException();
+        public override IEnumerable<Clue> BuildClues(ExecutionContext context, IExternalSearchQuery query, IExternalSearchQueryResult result, IExternalSearchRequest request) => BuildClues(context, query, result, request, null, null);
+        public override IEntityMetadata GetPrimaryEntityMetadata(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request) => GetPrimaryEntityMetadata(context, result, request, null, null);
 
         public string Icon { get; } = Constants.Icon;
         public string Domain { get; } = Constants.Domain;

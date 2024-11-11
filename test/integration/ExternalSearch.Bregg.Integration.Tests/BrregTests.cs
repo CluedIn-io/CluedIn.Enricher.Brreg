@@ -267,7 +267,7 @@ namespace ExternalSearch.Bregg.Integration.Tests
             };
 
             var orgRoot = new RootBrregOrganization() {
-                Data = new List<BrregOrganization>() { brregOrganization },
+                Embedded = new Unit() { Data = new List<BrregOrganization>() { brregOrganization } },
             };
 
             var query = new ExternalSearchQuery {

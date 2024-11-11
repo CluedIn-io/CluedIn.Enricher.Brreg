@@ -43,9 +43,9 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
         public bool? RegistredImGoodsRegisterBool { get { return GetBool(RegisteredImGoodsRegister); } }
 
         [DeserializeAs(Name = "registrertIForetaksregisteret")]
-        public string RegisteredBuisnessRegister { get; set; }
+        public string RegisteredBusinessRegister { get; set; }
 
-        public bool? RegistredBuisnessRegisterBool { get { return GetBool(RegisteredBuisnessRegister); } }
+        public bool? RegistredBusinessRegisterBool { get { return GetBool(RegisteredBusinessRegister); } }
 
         [DeserializeAs(Name = "registrertIStiftelsesregisteret")]
         public string RegisteredFoundingRegister { get; set; }
@@ -83,7 +83,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
         public bool? UnderLiquidationOrDissolutionBool { get { return GetBool(UnderLiquidationOrDissolution); } }
 
         [DeserializeAs(Name = "sisteInnsendteAarsregnskap")]
-        public int LatestFiledAnnualAccounts { get; set; }
+        public string LatestFiledAnnualAccounts { get; set; }
 
         [DeserializeAs(Name = "maalform")]
         public string LanguageVariant { get; set; }
