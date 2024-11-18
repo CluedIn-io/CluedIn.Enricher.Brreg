@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CluedIn.Core.Data.Relational;
 using CluedIn.Core.Providers;
 
@@ -17,11 +18,53 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
         public static AuthMethods AuthMethods { get; set; } = new AuthMethods()
         {
-            token = new List<Control>()
+            token = new List<Control>() {
+                new()
+                {
+                    displayName = "Accepted Entity Type",
+                    type = "input",
+                    isRequired = true,
+                    name = nameof(BrregExternalSearchJobData.AcceptedEntityType)
+                },
+                new()
+                {
+                    displayName = "Name Vocabulary Key",
+                    type = "input",
+                    isRequired = false,
+                    name = nameof(BrregExternalSearchJobData.NameVocabularyKey)
+                },
+                new()
+                {
+                    displayName = "Country Code Vocabulary Key",
+                    type = "input",
+                    isRequired = false,
+                    name = nameof(BrregExternalSearchJobData.CountryCodeVocabularyKey)
+                },
+                new()
+                {
+                    displayName = "Website Vocabulary Key",
+                    type = "input",
+                    isRequired = false,
+                    name = nameof(BrregExternalSearchJobData.WebsiteVocabularyKey)
+                },
+                new()
+                {
+                    displayName = "Brreg Code Vocabulary Key",
+                    type = "input",
+                    isRequired = false,
+                    name = nameof(BrregExternalSearchJobData.BrregCodeVocabularyKey)
+                },
+                new()
+                {
+                    displayName = "Skip Entity Code Creation (Brreg Code)",
+                    type = "checkbox",
+                    isRequired = false,
+                    name =  nameof(BrregExternalSearchJobData.SkipEntityCodeCreation),
+                }
+            }
         };
 
         public static IEnumerable<Control> Properties { get; set; } = new List<Control>() {  };
-
         public static Guide Guide { get; set; } = null;
         public static IntegrationType IntegrationType { get; set; } = IntegrationType.Enrichment;
     }
