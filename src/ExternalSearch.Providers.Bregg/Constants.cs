@@ -18,48 +18,54 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
         public static AuthMethods AuthMethods { get; set; } = new AuthMethods()
         {
-            token = new List<Control>() {
+            Token = new List<Control>() {
                 new()
                 {
-                    displayName = "Accepted Entity Type",
-                    type = "input",
-                    isRequired = true,
-                    name = nameof(BrregExternalSearchJobData.AcceptedEntityType)
+                    DisplayName = "Accepted Entity Type",
+                    Type = "input",
+                    IsRequired = true,
+                    Name = nameof(BrregExternalSearchJobData.AcceptedEntityType),
+                    Help = "The entity type that defines the golden records you want to enrich (e.g., /Organization)."
                 },
                 new()
                 {
-                    displayName = "Name Vocabulary Key",
-                    type = "input",
-                    isRequired = false,
-                    name = nameof(BrregExternalSearchJobData.NameVocabularyKey)
+                    DisplayName = "Name Vocabulary Key",
+                    Type = "input",
+                    IsRequired = false,
+                    Name = nameof(BrregExternalSearchJobData.NameVocabularyKey),
+                    Help = "The vocabulary key that contains the names of companies you want to enrich (e.g., organization.name)."
                 },
                 new()
                 {
-                    displayName = "Country Code Vocabulary Key",
-                    type = "input",
-                    isRequired = false,
-                    name = nameof(BrregExternalSearchJobData.CountryCodeVocabularyKey)
+                    DisplayName = "Country Code Vocabulary Key",
+                    Type = "input",
+                    IsRequired = false,
+                    Name = nameof(BrregExternalSearchJobData.CountryCodeVocabularyKey),
+                    Help = "The vocabulary key that contains the country codes of companies you want to enrich (e.g., organization.countrycode)."
                 },
                 new()
                 {
-                    displayName = "Website Vocabulary Key",
-                    type = "input",
-                    isRequired = false,
-                    name = nameof(BrregExternalSearchJobData.WebsiteVocabularyKey)
+                    DisplayName = "Website Vocabulary Key",
+                    Type = "input",
+                    IsRequired = false,
+                    Name = nameof(BrregExternalSearchJobData.WebsiteVocabularyKey),
+                    Help = "The vocabulary key that contains the websites of companies you want to enrich (e.g., organization.website)."
                 },
                 new()
                 {
-                    displayName = "Brreg Code Vocabulary Key",
-                    type = "input",
-                    isRequired = false,
-                    name = nameof(BrregExternalSearchJobData.BrregCodeVocabularyKey)
+                    DisplayName = "Brreg Code Vocabulary Key",
+                    Type = "input",
+                    IsRequired = false,
+                    Name = nameof(BrregExternalSearchJobData.BrregCodeVocabularyKey),
+                    Help = "The vocabulary key that contains the Brreg codes of companies you want to enrich (e.g., organization.brregs)."
                 },
                 new()
                 {
-                    displayName = "Skip Entity Code Creation (Brreg Code)",
-                    type = "checkbox",
-                    isRequired = false,
-                    name =  nameof(BrregExternalSearchJobData.SkipEntityCodeCreation),
+                    DisplayName = "Skip Entity Code Creation (Brreg Code)",
+                    Type = "checkbox",
+                    IsRequired = false,
+                    Name =  nameof(BrregExternalSearchJobData.SkipEntityCodeCreation),
+                    Help = "Toggle to control the creation of new entity codes using the Brreg code."
                 }
             }
         };
