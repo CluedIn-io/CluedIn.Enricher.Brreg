@@ -18,14 +18,6 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         public const string Instruction = """
             [
               {
-                "type": "paragraph",
-                "children": [
-                  {
-                    "text": "To find additional information for your golden records, the enricher requires some configuration. To configure the enricher:"
-                  }
-                ]
-              },
-              {
                 "type": "bulleted-list",
                 "children": [
                   {
