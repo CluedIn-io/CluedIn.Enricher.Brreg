@@ -8,6 +8,16 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 {
     public static class Constants
     {
+        public struct KeyName
+        {
+            public const string AcceptedEntityType = "acceptedEntityType";
+            public const string NameVocabularyKey = "nameVocabularyKey";
+            public const string CountryCodeVocabularyKey = "countryCodeVocabularyKey";
+            public const string WebsiteVocabularyKey = "websiteVocabularyKey";
+            public const string BrregCodeVocabularyKey = "brregCodeVocabularyKey";
+            public const string SkipEntityCodeCreation = "skipEntityCodeCreation";
+        }
+
         public const string ComponentName = "Brreg";
         public const string ProviderName = "Brreg";
         public static readonly Guid ProviderId = new Guid("fb23a770-5d9e-4763-91a7-2d81c3c5bcb9");
@@ -47,41 +57,41 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                 new()
                 {
                     DisplayName = "Accepted Entity Type",
-                    Type = "input",
+                    Type = "entityTypeSelector",
                     IsRequired = true,
-                    Name = nameof(BrregExternalSearchJobData.AcceptedEntityType),
+                    Name = KeyName.AcceptedEntityType,
                     Help = "The entity type that defines the golden records you want to enrich (e.g., /Organization)."
                 },
                 new()
                 {
                     DisplayName = "Name Vocabulary Key",
-                    Type = "input",
+                    Type = "vocabularyKeySelector",
                     IsRequired = false,
-                    Name = nameof(BrregExternalSearchJobData.NameVocabularyKey),
+                    Name = KeyName.NameVocabularyKey,
                     Help = "The vocabulary key that contains the names of companies you want to enrich (e.g., organization.name)."
                 },
                 new()
                 {
                     DisplayName = "Country Code Vocabulary Key",
-                    Type = "input",
+                    Type = "vocabularyKeySelector",
                     IsRequired = false,
-                    Name = nameof(BrregExternalSearchJobData.CountryCodeVocabularyKey),
+                    Name = KeyName.CountryCodeVocabularyKey,
                     Help = "The vocabulary key that contains the country codes of companies you want to enrich (e.g., organization.countrycode)."
                 },
                 new()
                 {
                     DisplayName = "Website Vocabulary Key",
-                    Type = "input",
+                    Type = "vocabularyKeySelector",
                     IsRequired = false,
-                    Name = nameof(BrregExternalSearchJobData.WebsiteVocabularyKey),
+                    Name = KeyName.WebsiteVocabularyKey,
                     Help = "The vocabulary key that contains the websites of companies you want to enrich (e.g., organization.website)."
                 },
                 new()
                 {
                     DisplayName = "Brreg Code Vocabulary Key",
-                    Type = "input",
+                    Type = "vocabularyKeySelector",
                     IsRequired = false,
-                    Name = nameof(BrregExternalSearchJobData.BrregCodeVocabularyKey),
+                    Name = KeyName.BrregCodeVocabularyKey,
                     Help = "The vocabulary key that contains the Brreg codes of companies you want to enrich (e.g., organization.brregs)."
                 },
                 new()
@@ -89,7 +99,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                     DisplayName = "Skip Entity Code Creation (Brreg Code)",
                     Type = "checkbox",
                     IsRequired = false,
-                    Name =  nameof(BrregExternalSearchJobData.SkipEntityCodeCreation),
+                    Name =  KeyName.SkipEntityCodeCreation,
                     Help = "Toggle to control the creation of new entity codes using the Brreg code."
                 }
             }

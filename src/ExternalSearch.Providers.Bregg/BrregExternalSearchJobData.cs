@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CluedIn.Core.Crawling;
+using static CluedIn.ExternalSearch.Providers.Bregg.Constants;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg
 {
@@ -7,24 +8,24 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
     {
         public BrregExternalSearchJobData(IDictionary<string, object> configuration)
         {
-            AcceptedEntityType = GetValue(configuration, nameof(AcceptedEntityType), default(string));
-            NameVocabularyKey = GetValue(configuration, nameof(NameVocabularyKey), default(string));
-            CountryCodeVocabularyKey = GetValue(configuration, nameof(CountryCodeVocabularyKey), default(string));
-            WebsiteVocabularyKey = GetValue(configuration, nameof(WebsiteVocabularyKey), default(string));
-            BrregCodeVocabularyKey = GetValue(configuration, nameof(BrregCodeVocabularyKey), default(string));
-            SkipEntityCodeCreation = GetValue(configuration, nameof(SkipEntityCodeCreation), default(bool));
+            AcceptedEntityType = GetValue(configuration, KeyName.AcceptedEntityType, default(string));
+            NameVocabularyKey = GetValue(configuration, KeyName.NameVocabularyKey, default(string));
+            CountryCodeVocabularyKey = GetValue(configuration, KeyName.CountryCodeVocabularyKey, default(string));
+            WebsiteVocabularyKey = GetValue(configuration, KeyName.WebsiteVocabularyKey, default(string));
+            BrregCodeVocabularyKey = GetValue(configuration, KeyName.BrregCodeVocabularyKey, default(string));
+            SkipEntityCodeCreation = GetValue(configuration, KeyName.SkipEntityCodeCreation, default(bool));
         }
 
         public IDictionary<string, object> ToDictionary()
         {
             return new Dictionary<string, object>()
             {
-                { nameof(AcceptedEntityType), AcceptedEntityType },
-                { nameof(NameVocabularyKey), NameVocabularyKey },
-                { nameof(CountryCodeVocabularyKey), CountryCodeVocabularyKey },
-                { nameof(WebsiteVocabularyKey), WebsiteVocabularyKey },
-                { nameof(BrregCodeVocabularyKey), BrregCodeVocabularyKey },
-                { nameof(SkipEntityCodeCreation), SkipEntityCodeCreation },
+                { KeyName.AcceptedEntityType, AcceptedEntityType },
+                { KeyName.NameVocabularyKey, NameVocabularyKey },
+                { KeyName.CountryCodeVocabularyKey, CountryCodeVocabularyKey },
+                { KeyName.WebsiteVocabularyKey, WebsiteVocabularyKey },
+                { KeyName.BrregCodeVocabularyKey, BrregCodeVocabularyKey },
+                { KeyName.SkipEntityCodeCreation, SkipEntityCodeCreation },
             };
         }
 
