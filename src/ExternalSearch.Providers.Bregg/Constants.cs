@@ -8,6 +8,16 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 {
     public static class Constants
     {
+        public struct KeyName
+        {
+            public const string AcceptedEntityType = "acceptedEntityType";
+            public const string NameVocabularyKey = "nameVocabularyKey";
+            public const string CountryCodeVocabularyKey = "countryCodeVocabularyKey";
+            public const string WebsiteVocabularyKey = "websiteVocabularyKey";
+            public const string BrregCodeVocabularyKey = "brregCodeVocabularyKey";
+            public const string SkipEntityCodeCreation = "skipEntityCodeCreation";
+        }
+
         public const string ComponentName = "Brreg";
         public const string ProviderName = "Brreg";
         public static readonly Guid ProviderId = new Guid("fb23a770-5d9e-4763-91a7-2d81c3c5bcb9");
@@ -15,57 +25,91 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         public static string About { get; set; } = "Brreg is an enricher which provides information on Norwegian companies";
         public static string Icon { get; set; } = "Resources.brreg_logo.svg";
         public static string Domain { get; set; } = "https://www.brreg.no/";
+        public const string Instruction = """
+            [
+              {
+                "type": "bulleted-list",
+                "children": [
+                  {
+                    "type": "list-item",
+                    "children": [
+                      {
+                        "text": "Add the entity type to specify the golden records you want to enrich. Only golden records belonging to that entity type will be enriched."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "list-item",
+                    "children": [
+                      {
+                        "text": "Add the vocabulary keys to provide the input for the enricher to search for additional information. For example, if you provide the website vocabulary key for the Web enricher, it will use specific websites to look for information about companies. In some cases, vocabulary keys are not required. If you don't add them, the enricher will use default vocabulary keys."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+            """;
 
         public static AuthMethods AuthMethods { get; set; } = new AuthMethods()
         {
-            token = new List<Control>() {
+            Token = new List<Control>() {
                 new()
                 {
-                    displayName = "Accepted Entity Type",
-                    type = "input",
-                    isRequired = true,
-                    name = nameof(BrregExternalSearchJobData.AcceptedEntityType)
+                    DisplayName = "Accepted Entity Type",
+                    Type = "entityTypeSelector",
+                    IsRequired = true,
+                    Name = KeyName.AcceptedEntityType,
+                    Help = "The entity type that defines the golden records you want to enrich (e.g., /Organization)."
                 },
                 new()
                 {
-                    displayName = "Name Vocabulary Key",
-                    type = "input",
-                    isRequired = false,
-                    name = nameof(BrregExternalSearchJobData.NameVocabularyKey)
+                    DisplayName = "Name Vocabulary Key",
+                    Type = "vocabularyKeySelector",
+                    IsRequired = false,
+                    Name = KeyName.NameVocabularyKey,
+                    Help = "The vocabulary key that contains the names of companies you want to enrich (e.g., organization.name)."
                 },
                 new()
                 {
-                    displayName = "Country Code Vocabulary Key",
-                    type = "input",
-                    isRequired = false,
-                    name = nameof(BrregExternalSearchJobData.CountryCodeVocabularyKey)
+                    DisplayName = "Country Code Vocabulary Key",
+                    Type = "vocabularyKeySelector",
+                    IsRequired = false,
+                    Name = KeyName.CountryCodeVocabularyKey,
+                    Help = "The vocabulary key that contains the country codes of companies you want to enrich (e.g., organization.countrycode)."
                 },
                 new()
                 {
-                    displayName = "Website Vocabulary Key",
-                    type = "input",
-                    isRequired = false,
-                    name = nameof(BrregExternalSearchJobData.WebsiteVocabularyKey)
+                    DisplayName = "Website Vocabulary Key",
+                    Type = "vocabularyKeySelector",
+                    IsRequired = false,
+                    Name = KeyName.WebsiteVocabularyKey,
+                    Help = "The vocabulary key that contains the websites of companies you want to enrich (e.g., organization.website)."
                 },
                 new()
                 {
-                    displayName = "Brreg Code Vocabulary Key",
-                    type = "input",
-                    isRequired = false,
-                    name = nameof(BrregExternalSearchJobData.BrregCodeVocabularyKey)
+                    DisplayName = "Brreg Code Vocabulary Key",
+                    Type = "vocabularyKeySelector",
+                    IsRequired = false,
+                    Name = KeyName.BrregCodeVocabularyKey,
+                    Help = "The vocabulary key that contains the Brreg codes of companies you want to enrich (e.g., organization.brregs)."
                 },
                 new()
                 {
-                    displayName = "Skip Entity Code Creation (Brreg Code)",
-                    type = "checkbox",
-                    isRequired = false,
-                    name =  nameof(BrregExternalSearchJobData.SkipEntityCodeCreation),
+                    DisplayName = "Skip Entity Code Creation (Brreg Code)",
+                    Type = "checkbox",
+                    IsRequired = false,
+                    Name =  KeyName.SkipEntityCodeCreation,
+                    Help = "Toggle to control the creation of new entity codes using the Brreg code."
                 }
             }
         };
 
         public static IEnumerable<Control> Properties { get; set; } = new List<Control>() {  };
-        public static Guide Guide { get; set; } = null;
+        public static Guide Guide { get; set; } = new Guide
+        {
+            Instructions = Instruction
+        };
         public static IntegrationType IntegrationType { get; set; } = IntegrationType.Enrichment;
     }
 }
