@@ -12,7 +12,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using CluedIn.Core;
+using CluedIn.Core.Connectors;
 using CluedIn.Core.Data;
 using CluedIn.Core.Data.Parts;
 using CluedIn.Core.Data.Relational;
@@ -32,7 +34,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 {
     /// <summary>The brreg external search provider.</summary>
     /// <seealso cref="CluedIn.ExternalSearch.ExternalSearchProviderBase" />
-    public class BrregExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider
+    public class BrregExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider, IExternalSearchProviderWithVerifyConnection
     {
         private static readonly EntityType[] DefaultAcceptedEntityTypes = { EntityType.Organization };
 
@@ -267,6 +269,51 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         public IPreviewImage GetPrimaryEntityPreviewImage(ExecutionContext context, IExternalSearchQueryResult result, IExternalSearchRequest request, IDictionary<string, object> config, IProvider provider)
         {
             return null;
+        }
+
+        public ConnectionVerificationResult VerifyConnection(ExecutionContext context, IReadOnlyDictionary<string, object> config)
+        {
+            var client = new RestClient("http://data.brreg.no/enhetsregisteret/");
+
+            RestRequest request = new RestRequest("api/enheter/912406652", Method.GET)
+            {
+                OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
+            };
+            var searchByBrregCodeResponse = client.Execute<BrregOrganization>(request);
+
+            if (!searchByBrregCodeResponse.IsSuccessful) 
+            {
+                return ConstructVerifyConnectionResponse(searchByBrregCodeResponse);
+            }
+
+            request = new RestRequest($"api/enheter?page=0&size=30&navn=Google", Method.GET)
+            {
+                OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
+            };
+
+            var searchByNameResponse = client.Execute<RootBrregOrganization>(request);
+
+            return ConstructVerifyConnectionResponse(searchByNameResponse);
+        }
+
+        private ConnectionVerificationResult ConstructVerifyConnectionResponse(IRestResponse response)
+        {
+            var errorMessageBase = $"{Constants.ProviderName} returned \"{(int)response.StatusCode} {response.StatusDescription}\".";
+            if (response.ErrorException != null)
+                return new ConnectionVerificationResult(false, $"{errorMessageBase} {(!string.IsNullOrWhiteSpace(response.ErrorException.Message) ? response.ErrorException.Message : "This could be due to breaking changes in the external system")}.");
+
+            if (response.StatusCode is HttpStatusCode.Unauthorized)
+                return new ConnectionVerificationResult(false, $"{errorMessageBase} This could be due to invalid API key.");
+
+            var regex = new Regex(@"\<(html|head|body|div|span|img|p\>|a href)", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
+            var isHtml = regex.IsMatch(response.Content);
+
+            string errorMessage = response.IsSuccessful ? string.Empty
+                : string.IsNullOrWhiteSpace(response.Content) || isHtml
+                    ? $"{errorMessageBase} This could be due to breaking changes in the external system."
+                    : $"{errorMessageBase} {response.Content}.";
+
+            return new ConnectionVerificationResult(response.IsSuccessful, errorMessage);
         }
 
         private IEntityMetadata CreateMetadata(IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request, IDictionary<string, object> config)
