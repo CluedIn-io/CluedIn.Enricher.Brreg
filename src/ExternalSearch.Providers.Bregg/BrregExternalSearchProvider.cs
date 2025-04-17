@@ -242,7 +242,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             if (resultItem.Data.BrregNumber == 0)
                 return null;
 
-            var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "brreg", $"{query.QueryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
+            var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "brreg", resultItem.Data.BrregNumber);
             var clue = new Clue(code, context.Organization);
             PopulateMetadata(clue.Data.EntityData, resultItem, request, config);
 
@@ -328,7 +328,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
         public void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request, IDictionary<string, object> config)
         {
-            var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "brreg", $"{request.Queries.FirstOrDefault()?.QueryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
+            var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "brreg", resultItem.Data.BrregNumber);
             var jobData = new BrregExternalSearchJobData(config);
 
             metadata.EntityType       = request.EntityMetaData.EntityType;
