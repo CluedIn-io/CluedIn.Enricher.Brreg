@@ -242,7 +242,8 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             if (resultItem.Data.BrregNumber == 0)
                 return null;
 
-            var clue = new Clue(request.EntityMetaData.OriginEntityCode, context.Organization);
+            var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "brreg", $"{query.QueryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
+            var clue = new Clue(code, context.Organization);
             PopulateMetadata(clue.Data.EntityData, resultItem, request, config);
 
             return new[] { clue };
@@ -325,29 +326,15 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             return metadata;
         }
 
-        private EntityCode GetOriginEntityCode(IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request)
-        {
-            return new EntityCode(request.EntityMetaData.EntityType, GetCodeOrigin(), resultItem.Data.BrregNumber);
-        }
-
-        private CodeOrigin GetCodeOrigin()
-        {
-            return CodeOrigin.CluedIn.CreateSpecific("brreg");
-        }
-
         public void PopulateMetadata(IEntityMetadata metadata, IExternalSearchQueryResult<BrregOrganization> resultItem, IExternalSearchRequest request, IDictionary<string, object> config)
         {
+            var code = new EntityCode(request.EntityMetaData.OriginEntityCode.Type, "brreg", $"{request.Queries.FirstOrDefault()?.QueryKey}{request.EntityMetaData.OriginEntityCode}".ToDeterministicGuid());
             var jobData = new BrregExternalSearchJobData(config);
-            var code = request.EntityMetaData.OriginEntityCode;
 
             metadata.EntityType       = request.EntityMetaData.EntityType;
             metadata.Name             = request.EntityMetaData.Name;
             metadata.OriginEntityCode = code;
-
-            if (!jobData.SkipEntityCodeCreation)
-            {
-                metadata.Codes.Add(GetOriginEntityCode(resultItem, request));
-            }
+            metadata.Codes.Add(request.EntityMetaData.OriginEntityCode);
 
             Uri uri = null;
 
