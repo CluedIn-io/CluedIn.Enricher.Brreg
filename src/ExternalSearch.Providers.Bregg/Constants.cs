@@ -14,7 +14,6 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             public const string CountryCodeVocabularyKey = "countryCodeVocabularyKey";
             public const string WebsiteVocabularyKey = "websiteVocabularyKey";
             public const string BrregCodeVocabularyKey = "brregCodeVocabularyKey";
-            public const string SkipEntityCodeCreation = "skipEntityCodeCreation";
         }
 
         public const string ComponentName = "Brreg";
@@ -100,14 +99,6 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                     Name = KeyName.BrregCodeVocabularyKey,
                     Help = "The vocabulary key that contains the Brreg codes of companies you want to enrich (e.g., organization.brregs)."
                 },
-                new()
-                {
-                    DisplayName = $"Skip {EntityCodeLabel} Creation (Brreg Code)",
-                    Type = "checkbox",
-                    IsRequired = false,
-                    Name =  KeyName.SkipEntityCodeCreation,
-                    Help = $"Toggle to control the creation of new {EntityCodesLabel.ToLower()} using the Brreg code."
-                }
             }
         };
 
