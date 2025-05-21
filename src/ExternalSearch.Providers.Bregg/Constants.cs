@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using CluedIn.Core.Data.Relational;
 using CluedIn.Core.Providers;
 
@@ -15,7 +14,6 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             public const string CountryCodeVocabularyKey = "countryCodeVocabularyKey";
             public const string WebsiteVocabularyKey = "websiteVocabularyKey";
             public const string BrregCodeVocabularyKey = "brregCodeVocabularyKey";
-            public const string SkipEntityCodeCreation = "skipEntityCodeCreation";
         }
 
         public const string ComponentName = "Brreg";
@@ -25,7 +23,14 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         public static string About { get; set; } = "Brreg is an enricher which provides information on Norwegian companies";
         public static string Icon { get; set; } = "Resources.brreg_logo.svg";
         public static string Domain { get; set; } = "https://www.brreg.no/";
-        public const string Instruction = """
+
+        private static Version _cluedInVersion;
+        public static Version CluedInVersion => _cluedInVersion ??= typeof(Core.Constants).Assembly.GetName().Version;
+        public static string EntityTypeLabel => CluedInVersion < new Version(4, 5, 0) ? "Entity Type" : "Business Domain";
+        public static string EntityCodeLabel => CluedInVersion < new Version(4, 5, 0) ? "Entity Code" : "Entity Identifier";
+        public static string EntityCodesLabel => CluedInVersion < new Version(4, 5, 0) ? "Entity Codes" : "Entity Identifiers";
+
+        public static readonly string Instruction = $$"""
             [
               {
                 "type": "bulleted-list",
@@ -34,7 +39,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                     "type": "list-item",
                     "children": [
                       {
-                        "text": "Add the entity type to specify the golden records you want to enrich. Only golden records belonging to that entity type will be enriched."
+                        "text": "Add the {{EntityTypeLabel}} to specify the golden records you want to enrich. Only golden records belonging to that {{EntityTypeLabel}} will be enriched."
                       }
                     ]
                   },
@@ -56,11 +61,11 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             Token = new List<Control>() {
                 new()
                 {
-                    DisplayName = "Accepted Entity Type",
+                    DisplayName = $"Accepted {EntityTypeLabel}",
                     Type = "entityTypeSelector",
                     IsRequired = true,
                     Name = KeyName.AcceptedEntityType,
-                    Help = "The entity type that defines the golden records you want to enrich (e.g., /Organization)."
+                    Help = $"The {EntityTypeLabel} that defines the golden records you want to enrich (e.g., /Organization)."
                 },
                 new()
                 {
@@ -94,14 +99,6 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                     Name = KeyName.BrregCodeVocabularyKey,
                     Help = "The vocabulary key that contains the Brreg codes of companies you want to enrich (e.g., organization.brregs)."
                 },
-                new()
-                {
-                    DisplayName = "Skip Entity Code Creation (Brreg Code)",
-                    Type = "checkbox",
-                    IsRequired = false,
-                    Name =  KeyName.SkipEntityCodeCreation,
-                    Help = "Toggle to control the creation of new entity codes using the Brreg code."
-                }
             }
         };
 
