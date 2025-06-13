@@ -120,7 +120,7 @@ namespace CluedIn.Provider.Brreg
         public IEnumerable<Control> Properties { get; } = Constants.Properties;
         public Guide Guide { get; } = Constants.Guide;
         public new IntegrationType Type { get; } = Constants.IntegrationType;
-        public Dictionary<string, HashSet<string>> ValidCombinations => new() {
+        public Dictionary<string, HashSet<string>> ValidRequiredFieldConfigurationCombinations => new() {
             { "Name, Country Code and Website", [Constants.KeyName.NameVocabularyKey, Constants.KeyName.CountryCodeVocabularyKey, Constants.KeyName.WebsiteVocabularyKey] },
             { "Brreg Code", [Constants.KeyName.BrregCodeVocabularyKey] }
         };
