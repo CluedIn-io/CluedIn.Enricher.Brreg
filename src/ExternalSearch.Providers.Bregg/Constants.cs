@@ -14,7 +14,6 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             public const string CountryCodeVocabularyKey = "countryCodeVocabularyKey";
             public const string WebsiteVocabularyKey = "websiteVocabularyKey";
             public const string BrregCodeVocabularyKey = "brregCodeVocabularyKey";
-            public const string SkipEntityCodeCreation = "skipEntityCodeCreation";
         }
 
         public const string ComponentName = "Brreg";
@@ -28,8 +27,8 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         private static Version _cluedInVersion;
         public static Version CluedInVersion => _cluedInVersion ??= typeof(Core.Constants).Assembly.GetName().Version;
         public static string EntityTypeLabel => CluedInVersion < new Version(4, 5, 0) ? "Entity Type" : "Business Domain";
-        public static string EntityCodeLabel => CluedInVersion < new Version(4, 5, 0) ? "Entity Code" : "Identifier";
-        public static string EntityCodesLabel => CluedInVersion < new Version(4, 5, 0) ? "Entity Codes" : "Identifiers";
+        public static string EntityCodeLabel => CluedInVersion < new Version(4, 5, 0) ? "Entity Code" : "Entity Identifier";
+        public static string EntityCodesLabel => CluedInVersion < new Version(4, 5, 0) ? "Entity Codes" : "Entity Identifiers";
 
         public static readonly string Instruction = $$"""
             [
@@ -100,14 +99,6 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                     Name = KeyName.BrregCodeVocabularyKey,
                     Help = "The vocabulary key that contains the Brreg codes of companies you want to enrich (e.g., organization.brregs)."
                 },
-                new()
-                {
-                    DisplayName = $"Skip {EntityCodeLabel} Creation (Brreg Code)",
-                    Type = "checkbox",
-                    IsRequired = false,
-                    Name =  KeyName.SkipEntityCodeCreation,
-                    Help = $"Toggle to control the creation of new {EntityCodesLabel.ToLower()} using the Brreg code."
-                }
             }
         };
 
