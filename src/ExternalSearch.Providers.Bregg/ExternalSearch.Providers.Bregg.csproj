@@ -11,6 +11,6 @@
     <PackageReference Include="CluedIn.ExternalSearch" />
   </ItemGroup>
   <PropertyGroup>
-	<LangVersion>preview</LangVersion>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 </Project>
