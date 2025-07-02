@@ -136,5 +136,25 @@ namespace CluedIn.Provider.Brreg
             { "autoSubmission", false },
             { "dataSourceSetId", string.Empty },
         };
+        
+        public Dictionary<string, HashSet<string>> ValidRequiredFieldConfigurationCombinations => new()
+        {
+            {
+                "Name, Country Code and Website",
+                new HashSet<string>
+                {
+                    Constants.KeyName.NameVocabularyKey,
+                    Constants.KeyName.CountryCodeVocabularyKey,
+                    Constants.KeyName.WebsiteVocabularyKey
+                }
+            },
+            {
+                "Brreg Code",
+                new HashSet<string>
+                {
+                    Constants.KeyName.BrregCodeVocabularyKey
+                }
+            }
+        };
     }
 }
