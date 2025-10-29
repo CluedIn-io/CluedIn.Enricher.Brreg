@@ -89,21 +89,22 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
             // Query Input.
             var entityType = request.EntityMetaData.EntityType;
+            var entityName = !string.IsNullOrEmpty(request.EntityMetaData.Name) ? request.EntityMetaData.Name : request.EntityMetaData.DisplayName;
 
-            var breggExternalSearchJobData = new BrregExternalSearchJobData(config);
+            var brregExternalSearchJobData = new BrregExternalSearchJobData(config);
 
             var name = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.OrganizationName, new HashSet<string>());
             var countryCode = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressCountryCode, new HashSet<string>());
             var website = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Website, new HashSet<string>());
 
-            if (!string.IsNullOrWhiteSpace(breggExternalSearchJobData.NameVocabularyKey))
-                name = request.QueryParameters.GetValue<string, HashSet<string>>(breggExternalSearchJobData.NameVocabularyKey, new HashSet<string>());
+            if (!string.IsNullOrWhiteSpace(brregExternalSearchJobData.NameVocabularyKey))
+                name = request.QueryParameters.GetValue<string, HashSet<string>>(brregExternalSearchJobData.NameVocabularyKey, new HashSet<string>());
 
-            if (!string.IsNullOrWhiteSpace(breggExternalSearchJobData.CountryCodeVocabularyKey))
-                countryCode = request.QueryParameters.GetValue<string, HashSet<string>>(breggExternalSearchJobData.CountryCodeVocabularyKey, new HashSet<string>());
+            if (!string.IsNullOrWhiteSpace(brregExternalSearchJobData.CountryCodeVocabularyKey))
+                countryCode = request.QueryParameters.GetValue<string, HashSet<string>>(brregExternalSearchJobData.CountryCodeVocabularyKey, new HashSet<string>());
 
-            if (!string.IsNullOrWhiteSpace(breggExternalSearchJobData.WebsiteVocabularyKey))
-                website = request.QueryParameters.GetValue<string, HashSet<string>>(breggExternalSearchJobData.WebsiteVocabularyKey, new HashSet<string>());
+            if (!string.IsNullOrWhiteSpace(brregExternalSearchJobData.WebsiteVocabularyKey))
+                website = request.QueryParameters.GetValue<string, HashSet<string>>(brregExternalSearchJobData.WebsiteVocabularyKey, new HashSet<string>());
 
             bool CountryFilter(string c) => c.Equals("no", StringComparison.OrdinalIgnoreCase)
                                          || c.Equals("NOR", StringComparison.OrdinalIgnoreCase)
@@ -117,17 +118,21 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                 namePostFixFilter = value => false;
             }
 
+            var queriesGenerated = false;
             var brregId = request.QueryParameters.GetValue(Core.Data.Vocabularies.Vocabularies.CluedInOrganization.CodesBrreg, new HashSet<string>());
 
-            if (!string.IsNullOrWhiteSpace(breggExternalSearchJobData.BrregCodeVocabularyKey))
-                brregId = request.QueryParameters.GetValue<string, HashSet<string>>(breggExternalSearchJobData.BrregCodeVocabularyKey, new HashSet<string>());
+            if (!string.IsNullOrWhiteSpace(brregExternalSearchJobData.BrregCodeVocabularyKey))
+                brregId = request.QueryParameters.GetValue<string, HashSet<string>>(brregExternalSearchJobData.BrregCodeVocabularyKey, new HashSet<string>());
 
             if (brregId != null && brregId.Any())
             {
                 var values = brregId;
 
                 foreach (var value in values.Where(v => !BrregFilter(v)))
+                {
+                    queriesGenerated = true;
                     yield return new ExternalSearchQuery(this, entityType, ExternalSearchQueryParameter.Identifier, value);
+                }
             }
 
             if (website != null && website.Any())
@@ -143,8 +148,14 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                 var values = name;
 
                 foreach (var value in values.Where(v => !NameFilter(v) && !namePostFixFilter(v)))
+                {
+                    queriesGenerated = true;
                     yield return new ExternalSearchQuery(this, entityType, ExternalSearchQueryParameter.Name, value);
+                }
             }
+
+            // Throw error when queries not generated
+            ThrowExceptions(queriesGenerated, brregId, name, entityName, brregExternalSearchJobData);
         }
 
         public IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query, IDictionary<string, object> config, IProvider provider)
@@ -178,15 +189,12 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
                         break;
                     }
-                    case HttpStatusCode.NoContent:
-                    case HttpStatusCode.NotFound:
-                        yield break;
                     default:
                     {
                         if (response.ErrorException != null)
                             throw new AggregateException(response.ErrorException.Message, response.ErrorException);
-                        else
-                            throw new ApplicationException("Could not execute external search query - StatusCode:" + response.StatusCode + "; Content: " + response.Content);
+
+                        throw new ApplicationException("Could not execute external search query - StatusCode:" + response.StatusCode + "; Content: " + response.Content);
                     }
                 }
             }
@@ -220,9 +228,6 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
                             break;
                         }
-                        case HttpStatusCode.NoContent:
-                        case HttpStatusCode.NotFound:
-                            yield break;
                         default:
                         {
                             if (response.ErrorException != null)
@@ -410,6 +415,19 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             metadata.Properties[vocabulary.MunicipalityNumber] = address.MunicipalityNumber.PrintIfAvailable();
             metadata.Properties[vocabulary.Address]            = address.Address.PrintIfAvailable(v => string.Join(Environment.NewLine, v));
             metadata.Properties[vocabulary.PostalArea]         = address.PostalArea.PrintIfAvailable();
+        }
+
+        private static void ThrowExceptions(bool queriesGenerated, HashSet<string> brregId, HashSet<string> name, string entityName, BrregExternalSearchJobData brregExternalSearchJobData)
+        {
+            switch (queriesGenerated)
+            {
+                case false when !string.IsNullOrWhiteSpace(brregExternalSearchJobData.BrregCodeVocabularyKey) && string.IsNullOrWhiteSpace(brregExternalSearchJobData.NameVocabularyKey) && !brregId.Any():
+                    throw new Exception($"Unable to generate queries for {entityName}. Brreg code is empty.");
+                case false when !brregId.Any() && name.Any():
+                    throw new Exception($"Unable to generate queries for {entityName}. Name must include a Norwegian company suffix or keyword, or the website/country must indicate Norway. Please refer to https://documentation.cluedin.net/preparation/enricher/brreg");
+                case false when !brregId.Any() && !name.Any():
+                    throw new Exception($"Unable to generate queries for {entityName}. Both Brreg code and name are empty.");
+            }
         }
 
         // Since this is a configurable external search provider, theses methods should never be called
