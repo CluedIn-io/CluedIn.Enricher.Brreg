@@ -1,13 +1,13 @@
-﻿using RestSharp.Deserializers;
+using System.Text.Json.Serialization;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class Link
 	{
-		[DeserializeAs(Name = "rel")]
+		[JsonPropertyName("rel")]
 		public string Rel { get; set; }
 
-		[DeserializeAs(Name = "href")]
+		[JsonPropertyName("href")]
 		public string Href { get; set; }
 	}
 }

@@ -8,90 +8,90 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
-using RestSharp.Deserializers;
+using System.Text.Json.Serialization;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class BrregOrganization
     {
-        [DeserializeAs(Name = "organisasjonsnummer")]
+        [JsonPropertyName("organisasjonsnummer")]
         public int BrregNumber { get; set; }
 
-        [DeserializeAs(Name = "links")]
+        [JsonPropertyName("links")]
         public string Links { get; set; }
 
-        [DeserializeAs(Name = "navn")]
+        [JsonPropertyName("navn")]
         public string Name { get; set; }
 
-        [DeserializeAs(Name = "stiftelsesdato")]
+        [JsonPropertyName("stiftelsesdato")]
         public string FoundedDate { get; set; }
 
-        [DeserializeAs(Name = "registreringsdatoEnhetsregisteret")]
+        [JsonPropertyName("registreringsdatoEnhetsregisteret")]
         public string RegistrationDate { get; set; }
 
-        [DeserializeAs(Name = "organisasjonsform")]
+        [JsonPropertyName("organisasjonsform")]
         public virtual string OrganisationType { get; set; } // TODO: Does not deserialize correctly for get by id
 
-        [DeserializeAs(Name = "registrertIFrivillighetsregisteret")]
+        [JsonPropertyName("registrertIFrivillighetsregisteret")]
         public string VoluntaryRegistered { get; set; }
 
         public bool? VoluntaryRegisteredBool { get { return GetBool(VoluntaryRegistered); } }
 
-        [DeserializeAs(Name = "registrertIMvaregisteret")]
+        [JsonPropertyName("registrertIMvaregisteret")]
         public string RegisteredImGoodsRegister { get; set; }
 
         public bool? RegistredImGoodsRegisterBool { get { return GetBool(RegisteredImGoodsRegister); } }
 
-        [DeserializeAs(Name = "registrertIForetaksregisteret")]
+        [JsonPropertyName("registrertIForetaksregisteret")]
         public string RegisteredBusinessRegister { get; set; }
 
         public bool? RegistredBusinessRegisterBool { get { return GetBool(RegisteredBusinessRegister); } }
 
-        [DeserializeAs(Name = "registrertIStiftelsesregisteret")]
+        [JsonPropertyName("registrertIStiftelsesregisteret")]
         public string RegisteredFoundingRegister { get; set; }
 
         public bool? RegisteredFoundingRegisterBool { get { return GetBool(RegisteredFoundingRegister); } }
 
-        [DeserializeAs(Name = "antallAnsatte")]
+        [JsonPropertyName("antallAnsatte")]
         public int? NumberEmployees { get; set; }
 
-        [DeserializeAs(Name = "institusjonellSektorkode")]
+        [JsonPropertyName("institusjonellSektorkode")]
         public InstitutionSectorCode InstitutionSectorCode { get; set; }
 
-        [DeserializeAs(Name = "naeringskode1")]
+        [JsonPropertyName("naeringskode1")]
         public IndustryCode1 IndustryCode1 { get; set; }
 
-        [DeserializeAs(Name = "forretningsadresse")]
+        [JsonPropertyName("forretningsadresse")]
         public PostAddress BusinessAddress { get; set; }
 
-        [DeserializeAs(Name = "postadresse")]
+        [JsonPropertyName("postadresse")]
         public virtual PostAddress PostAddress { get; set; }
 
-        [DeserializeAs(Name = "konkurs")]
+        [JsonPropertyName("konkurs")]
         public string Bankrupt { get; set; }
 
         public bool? BankruptBool { get { return GetBool(Bankrupt); } }
 
-        [DeserializeAs(Name = "underAvvikling")]
+        [JsonPropertyName("underAvvikling")]
         public string UnderLiquidation { get; set; }
 
         public bool? UnderLiquidationBool { get { return GetBool(UnderLiquidation); } }
 
-        [DeserializeAs(Name = "underTvangsavviklingEllerTvangsopplosning")]
+        [JsonPropertyName("underTvangsavviklingEllerTvangsopplosning")]
         public string UnderLiquidationOrDissolution { get; set; }
 
         public bool? UnderLiquidationOrDissolutionBool { get { return GetBool(UnderLiquidationOrDissolution); } }
 
-        [DeserializeAs(Name = "sisteInnsendteAarsregnskap")]
+        [JsonPropertyName("sisteInnsendteAarsregnskap")]
         public string LatestFiledAnnualAccounts { get; set; }
 
-        [DeserializeAs(Name = "maalform")]
+        [JsonPropertyName("maalform")]
         public string LanguageVariant { get; set; }
 
-        [DeserializeAs(Name = "orgform")]
+        [JsonPropertyName("orgform")]
         public Orgform Orgform { get; set; }
 
-        [DeserializeAs(Name = "hjemmeside")]
+        [JsonPropertyName("hjemmeside")]
         public string Website { get; set; }
 
         private bool? GetBool(string value)

@@ -139,7 +139,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             {
                 var hosts = website.Where(UriUtility.IsValid).Select(u => new Uri(u).Host.ToLowerInvariant()).Distinct();
 
-                if (hosts.Any(h => DomainName.TryParse(h, out var domain) && string.Equals(domain.TLD, "no", StringComparison.InvariantCultureIgnoreCase)))
+                if (hosts.Any(h => DomainName.TryParse(h, out var domain) && string.Equals(domain.TopLevelDomain, "no", StringComparison.InvariantCultureIgnoreCase)))
                     namePostFixFilter = value => false;
             }
 
@@ -167,7 +167,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             {
                 var id = query.QueryParameters[ExternalSearchQueryParameter.Identifier].FirstOrDefault();
 
-                request = new RestRequest($"api/enheter/{id}", Method.GET) {
+                request = new RestRequest($"api/enheter/{id}", Method.Get) {
                     OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
                 };
 
@@ -204,7 +204,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                 var name = query.QueryParameters[ExternalSearchQueryParameter.Name].FirstOrDefault();
                 if (!string.IsNullOrEmpty(name))
                 {
-                    request = new RestRequest($"api/enheter?page=0&size=30&navn={name}", Method.GET) {
+                    request = new RestRequest($"api/enheter?page=0&size=30&navn={name}", Method.Get) {
                         OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
                     };
 
@@ -281,7 +281,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
         {
             var client = new RestClient("http://data.brreg.no/enhetsregisteret/");
 
-            RestRequest request = new RestRequest("api/enheter/912406652", Method.GET)
+            RestRequest request = new RestRequest("api/enheter/912406652", Method.Get)
             {
                 OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
             };
@@ -292,7 +292,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                 return ConstructVerifyConnectionResponse(searchByBrregCodeResponse);
             }
 
-            request = new RestRequest($"api/enheter?page=0&size=30&navn=Google", Method.GET)
+            request = new RestRequest($"api/enheter?page=0&size=30&navn=Google", Method.Get)
             {
                 OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
             };
@@ -302,7 +302,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             return ConstructVerifyConnectionResponse(searchByNameResponse);
         }
 
-        private ConnectionVerificationResult ConstructVerifyConnectionResponse(IRestResponse response)
+        private ConnectionVerificationResult ConstructVerifyConnectionResponse(RestResponse response)
         {
             var errorMessageBase = $"{Constants.ProviderName} returned \"{(int)response.StatusCode} {response.StatusDescription}\".";
             if (response.ErrorException != null)

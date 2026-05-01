@@ -18,11 +18,11 @@ using CluedIn.ExternalSearch;
 using CluedIn.ExternalSearch.Providers.Bregg;
 using CluedIn.ExternalSearch.Providers.Bregg.Models;
 using CluedIn.ExternalSearch.Providers.Bregg.Vocabularies;
-using CluedIn.Testing.Base.Context;
 using CluedIn.Testing.Base.ExternalSearch;
 using Moq;
 using RestSharp;
 using Xunit;
+using TestContext = CluedIn.Testing.Base.Context.TestContext;
 
 namespace ExternalSearch.Bregg.Integration.Tests
 {
@@ -293,7 +293,7 @@ namespace ExternalSearch.Bregg.Integration.Tests
         public void Id_DeserializationTest(string brregId)
         {
             var client  = new RestClient("http://data.brreg.no/enhetsregisteret");
-            var request = new RestRequest($"api/enheter/{brregId}", Method.GET);
+            var request = new RestRequest($"api/enheter/{brregId}", Method.Get);
 
             var response = client.Execute<BrregOrganization>(request);
 
