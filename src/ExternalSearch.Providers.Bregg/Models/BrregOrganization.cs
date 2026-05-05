@@ -8,6 +8,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
@@ -15,6 +16,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 	public class BrregOrganization
     {
         [JsonPropertyName("organisasjonsnummer")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public int BrregNumber { get; set; }
 
         [JsonPropertyName("links")]
@@ -30,24 +32,29 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
         public string RegistrationDate { get; set; }
 
         [JsonPropertyName("organisasjonsform")]
+        [JsonConverter(typeof(RawJsonStringConverter))]
         public virtual string OrganisationType { get; set; } // TODO: Does not deserialize correctly for get by id
 
         [JsonPropertyName("registrertIFrivillighetsregisteret")]
+        [JsonConverter(typeof(RawJsonStringConverter))]
         public string VoluntaryRegistered { get; set; }
 
         public bool? VoluntaryRegisteredBool { get { return GetBool(VoluntaryRegistered); } }
 
         [JsonPropertyName("registrertIMvaregisteret")]
+        [JsonConverter(typeof(RawJsonStringConverter))]
         public string RegisteredImGoodsRegister { get; set; }
 
         public bool? RegistredImGoodsRegisterBool { get { return GetBool(RegisteredImGoodsRegister); } }
 
         [JsonPropertyName("registrertIForetaksregisteret")]
+        [JsonConverter(typeof(RawJsonStringConverter))]
         public string RegisteredBusinessRegister { get; set; }
 
         public bool? RegistredBusinessRegisterBool { get { return GetBool(RegisteredBusinessRegister); } }
 
         [JsonPropertyName("registrertIStiftelsesregisteret")]
+        [JsonConverter(typeof(RawJsonStringConverter))]
         public string RegisteredFoundingRegister { get; set; }
 
         public bool? RegisteredFoundingRegisterBool { get { return GetBool(RegisteredFoundingRegister); } }
@@ -68,16 +75,19 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
         public virtual PostAddress PostAddress { get; set; }
 
         [JsonPropertyName("konkurs")]
+        [JsonConverter(typeof(RawJsonStringConverter))]
         public string Bankrupt { get; set; }
 
         public bool? BankruptBool { get { return GetBool(Bankrupt); } }
 
         [JsonPropertyName("underAvvikling")]
+        [JsonConverter(typeof(RawJsonStringConverter))]
         public string UnderLiquidation { get; set; }
 
         public bool? UnderLiquidationBool { get { return GetBool(UnderLiquidation); } }
 
         [JsonPropertyName("underTvangsavviklingEllerTvangsopplosning")]
+        [JsonConverter(typeof(RawJsonStringConverter))]
         public string UnderLiquidationOrDissolution { get; set; }
 
         public bool? UnderLiquidationOrDissolutionBool { get { return GetBool(UnderLiquidationOrDissolution); } }
