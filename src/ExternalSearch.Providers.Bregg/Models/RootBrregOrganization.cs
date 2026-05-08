@@ -1,17 +1,17 @@
-﻿using System.Collections.Generic;
-using RestSharp.Deserializers;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class RootBrregOrganization
 	{
-		[DeserializeAs(Name = "embedded")]
+		[JsonPropertyName("_embedded")]
 		public Unit Embedded { get; set; }
 
-		[DeserializeAs(Name = "links")]
+		[JsonPropertyName("_links")]
 		public List<Link> Links { get; set; }
 
-		[DeserializeAs(Name = "page")]
+		[JsonPropertyName("page")]
 		public Page Page { get; set; }
 	}
 }

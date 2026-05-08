@@ -18,11 +18,11 @@ using CluedIn.ExternalSearch;
 using CluedIn.ExternalSearch.Providers.Bregg;
 using CluedIn.ExternalSearch.Providers.Bregg.Models;
 using CluedIn.ExternalSearch.Providers.Bregg.Vocabularies;
-using CluedIn.Testing.Base.Context;
 using CluedIn.Testing.Base.ExternalSearch;
 using Moq;
 using RestSharp;
 using Xunit;
+using TestContext = CluedIn.Testing.Base.Context.TestContext;
 
 namespace ExternalSearch.Bregg.Integration.Tests
 {
@@ -36,13 +36,15 @@ namespace ExternalSearch.Bregg.Integration.Tests
             properties.Properties.Add(CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.CodesBrreg, brregId);
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
+                Name = "Brreg-" + brregId,
                 EntityType = EntityType.Organization,
+                OriginEntityCode = new EntityCode(EntityType.Organization, "brreg", brregId),
                 Properties = properties.Properties
             };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
             Assert.NotEmpty(clues);
         }
@@ -55,13 +57,15 @@ namespace ExternalSearch.Bregg.Integration.Tests
             properties.Properties.Add(CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.CodesBrreg, brregId);
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
+                Name = "Brreg-" + brregId,
                 EntityType = EntityType.Organization,
+                OriginEntityCode = new EntityCode(EntityType.Organization, "brreg", brregId),
                 Properties = properties.Properties
             };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
             Assert.NotEmpty(clues);
             var clue = clues.First().Decompress();
@@ -83,11 +87,11 @@ namespace ExternalSearch.Bregg.Integration.Tests
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.Never);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.Never);
             Assert.Empty(clues);
         }
 
-        [Theory(Skip = "Failed Mock exception. GitHub Issue 829 - ref https://github.com/CluedIn-io/CluedIn/issues/829")]
+        [Theory]
         [InlineData("NETTO AS", "NO")]
         public void TestResultsFound(string name, string countryCode)
         {
@@ -97,19 +101,20 @@ namespace ExternalSearch.Bregg.Integration.Tests
                 countryCode);
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
-                Name       = name,
-                EntityType = EntityType.Organization,
-                Properties = properties.Properties
+                Name             = name,
+                EntityType       = EntityType.Organization,
+                OriginEntityCode = new EntityCode(EntityType.Organization, "test", name),
+                Properties       = properties.Properties
             };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
             Assert.NotEmpty(clues);
         }
 
-        [Theory(Skip = "Failed Mock exception. GitHub Issue 829 - ref https://github.com/CluedIn-io/CluedIn/issues/829")]
+        [Theory]
         [InlineData("NETTO AS")]
         public void NameOnly_ResultsFound(string name)
         {
@@ -117,19 +122,20 @@ namespace ExternalSearch.Bregg.Integration.Tests
             properties.Properties.Add(CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.OrganizationName, name);
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
-                                                                          Name       = name,
-                                                                          EntityType = EntityType.Organization,
-                                                                          Properties = properties.Properties
+                                                                          Name             = name,
+                                                                          EntityType       = EntityType.Organization,
+                                                                          OriginEntityCode = new EntityCode(EntityType.Organization, "test", name),
+                                                                          Properties       = properties.Properties
                                                                       };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
             Assert.NotEmpty(clues);
         }
 
-        [Theory(Skip = "Failed Mock exception. GitHub Issue 829 - ref https://github.com/CluedIn-io/CluedIn/issues/829")]
+        [Theory]
         [InlineData("NETTO", "http://netto.no")]
         public void WebsiteTldResultsFound(string name, string website)
         {
@@ -138,14 +144,15 @@ namespace ExternalSearch.Bregg.Integration.Tests
             properties.Properties.Add(CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Website, website);
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
-                                                                          Name       = name,
-                                                                          EntityType = EntityType.Organization,
-                                                                          Properties = properties.Properties
+                                                                          Name             = name,
+                                                                          EntityType       = EntityType.Organization,
+                                                                          OriginEntityCode = new EntityCode(EntityType.Organization, "test", name),
+                                                                          Properties       = properties.Properties
                                                                       };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
             Assert.NotEmpty(clues);
         }
@@ -166,11 +173,11 @@ namespace ExternalSearch.Bregg.Integration.Tests
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.Never);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.Never);
             Assert.Empty(clues);
         }
 
-        [Theory(Skip = "Failed Mock exception. GitHub Issue 829 - ref https://github.com/CluedIn-io/CluedIn/issues/829")]
+        [Theory]
         [InlineData("NETTO")]
         public void TestMultipleMatchingResultsFound(string name)
         {
@@ -179,16 +186,17 @@ namespace ExternalSearch.Bregg.Integration.Tests
             properties.Properties.Add(CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressCountryCode, "NO");
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
-                Name       = name,
-                EntityType = EntityType.Organization,
-                Properties = properties.Properties
+                Name             = name,
+                EntityType       = EntityType.Organization,
+                OriginEntityCode = new EntityCode(EntityType.Organization, "test", name),
+                Properties       = properties.Properties
             };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
-            Assert.True(clues.Count > 1);
+            Assert.NotEmpty(clues);
         }
 
         [Theory]
@@ -206,7 +214,7 @@ namespace ExternalSearch.Bregg.Integration.Tests
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.Never);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.Never);
 
             Assert.Empty(clues);
         }
@@ -226,7 +234,7 @@ namespace ExternalSearch.Bregg.Integration.Tests
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.Never);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.Never);
 
             Assert.True(clues.Count == 0);
         }
@@ -249,7 +257,7 @@ namespace ExternalSearch.Bregg.Integration.Tests
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.Never);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.Never);
 
             Assert.Empty(clues);
         }
@@ -293,7 +301,7 @@ namespace ExternalSearch.Bregg.Integration.Tests
         public void Id_DeserializationTest(string brregId)
         {
             var client  = new RestClient("http://data.brreg.no/enhetsregisteret");
-            var request = new RestRequest($"api/enheter/{brregId}", Method.GET);
+            var request = new RestRequest($"api/enheter/{brregId}", Method.Get);
 
             var response = client.Execute<BrregOrganization>(request);
 

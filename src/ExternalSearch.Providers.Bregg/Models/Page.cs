@@ -1,14 +1,13 @@
-﻿using RestSharp.Deserializers;
+using System.Text.Json.Serialization;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class Page
 	{
-
-		[DeserializeAs(Name = "size")]
+		[JsonPropertyName("size")]
 		public int Size { get; set; }
 
-		[DeserializeAs(Name = "page")]
+		[JsonPropertyName("page")]
 		public int PageCount { get; set; }
 	}
 }
