@@ -8,11 +8,12 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using RestSharp.Deserializers;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
-	public class BrregOrganization
+    public class BrregOrganization
     {
         [DeserializeAs(Name = "organisasjonsnummer")]
         public int BrregNumber { get; set; }
@@ -93,6 +94,32 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 
         [DeserializeAs(Name = "hjemmeside")]
         public string Website { get; set; }
+
+        [DeserializeAs(Name = "harRegistrertAntallAnsatte")]
+        public bool? HasRegisteredNumberOfEmployees { get; set; }
+
+        [DeserializeAs(Name = "registreringsdatoMerverdiavgiftsregisteret")]
+        public string VatRegistrationDate { get; set; }
+
+        [DeserializeAs(Name = "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret")]
+        public string VatRegistrationDateEntityRegister { get; set; }
+
+        [DeserializeAs(Name = "aktivitet")]
+        public List<string> Activities { get; set; }
+
+        [DeserializeAs(Name = "registrertIPartiregisteret")]
+        public string RegisteredInPartyRegister { get; set; }
+
+        public bool? RegisteredInPartyRegisterBool { get { return GetBool(RegisteredInPartyRegister); } }
+
+        [DeserializeAs(Name = "paategninger")]
+        public List<string> Endorsements { get; set; }
+
+        [DeserializeAs(Name = "erIKonsern")]
+        public bool? IsPartOfCorporateGroup { get; set; }
+
+        [DeserializeAs(Name = "respons_klasse")]
+        public string ResponseClass { get; set; }
 
         private bool? GetBool(string value)
         {

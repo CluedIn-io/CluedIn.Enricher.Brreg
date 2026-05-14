@@ -23,8 +23,8 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Vocabularies
 
             AddGroup("Metadata", group =>
             {
-                Name                               = group.Add(new VocabularyKey("name"));
-                BrregNumber                        = group.Add(new VocabularyKey("brregNumber",                        VocabularyKeyDataType.Number));
+                Name                               = group.Add(new VocabularyKey("name",                               VocabularyKeyDataType.Text));
+                BrregNumber                        = group.Add(new VocabularyKey("brregNumber"));
                 FoundedDate                        = group.Add(new VocabularyKey("foundedDate",                        VocabularyKeyDataType.DateTime));
                 RegistrationDate                   = group.Add(new VocabularyKey("registrationDate",                   VocabularyKeyDataType.DateTime));
                 OrganizationType                   = group.Add(new VocabularyKey("organizationType"));
@@ -56,6 +56,16 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Vocabularies
                 IndustryDescription                = group.Add(new VocabularyKey("industryDescription"));
                 InstitutionSectorCode              = group.Add(new VocabularyKey("institutionSectorCode",              VocabularyKeyDataType.Number));
                 InstitutionSectorDescription       = group.Add(new VocabularyKey("institutionSectorDescription"));
+                OrgformCode                        = group.Add(new VocabularyKey("orgformCode"));
+                OrgformDescription                 = group.Add(new VocabularyKey("orgformDescription"));
+                HasRegisteredNumberOfEmployees     = group.Add(new VocabularyKey("hasRegisteredNumberOfEmployees",     VocabularyKeyDataType.Boolean));
+                VatRegistrationDate                = group.Add(new VocabularyKey("vatRegistrationDate",                VocabularyKeyDataType.DateTime));
+                VatRegistrationDateEntityRegister  = group.Add(new VocabularyKey("vatRegistrationDateEntityRegister",  VocabularyKeyDataType.DateTime));
+                Activities                         = group.Add(new VocabularyKey("activities",                         VocabularyKeyDataType.Text));
+                RegisteredInPartyRegister          = group.Add(new VocabularyKey("registeredInPartyRegister",          VocabularyKeyDataType.Boolean));
+                Endorsements                       = group.Add(new VocabularyKey("endorsements",                       VocabularyKeyDataType.Text));
+                IsPartOfCorporateGroup             = group.Add(new VocabularyKey("isPartOfCorporateGroup",             VocabularyKeyDataType.Boolean));
+                ResponseClass                      = group.Add(new VocabularyKey("responseClass",                      VocabularyKeyDataType.Text,        VocabularyKeyVisibility.Hidden));
             });
 
             AddMapping(BrregNumber,                   CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.CodesBrreg);
@@ -95,5 +105,15 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Vocabularies
         public VocabularyKey Website { get; protected set; }
         public BrregAddressVocabulary Address { get; protected set; }
         public BrregAddressVocabulary BusinessAddress { get; protected set; }
+        public VocabularyKey OrgformCode { get; protected set; }
+        public VocabularyKey OrgformDescription { get; protected set; }
+        public VocabularyKey HasRegisteredNumberOfEmployees { get; protected set; }
+        public VocabularyKey VatRegistrationDate { get; protected set; }
+        public VocabularyKey VatRegistrationDateEntityRegister { get; protected set; }
+        public VocabularyKey Activities { get; protected set; }
+        public VocabularyKey RegisteredInPartyRegister { get; protected set; }
+        public VocabularyKey Endorsements { get; protected set; }
+        public VocabularyKey IsPartOfCorporateGroup { get; protected set; }
+        public VocabularyKey ResponseClass { get; protected set; }
     }
 }
