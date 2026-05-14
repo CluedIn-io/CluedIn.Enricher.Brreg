@@ -1,29 +1,29 @@
-﻿using System.Collections.Generic;
-using RestSharp.Deserializers;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class PostAddress
 	{
-		[DeserializeAs(Name = "adresse")]
-		public List<string> Address { get; set; } 
+		[JsonPropertyName("adresse")]
+		public List<string> Address { get; set; }
 
-		[DeserializeAs(Name = "postnummer")]
+		[JsonPropertyName("postnummer")]
 		public string PostalCode { get; set; }
 
-		[DeserializeAs(Name = "poststed")]
+		[JsonPropertyName("poststed")]
 		public string PostalArea { get; set; }
 
-		[DeserializeAs(Name = "kommunenummer")]
+		[JsonPropertyName("kommunenummer")]
 		public string MunicipalityNumber { get; set; }
 
-		[DeserializeAs(Name = "kommune")]
+		[JsonPropertyName("kommune")]
 		public string Municipality { get; set; }
 
-		[DeserializeAs(Name = "landkode")]
+		[JsonPropertyName("landkode")]
 		public string CountryCode { get; set; }
 
-		[DeserializeAs(Name = "land")]
+		[JsonPropertyName("land")]
 		public string Country { get; set; }
 	}
 }

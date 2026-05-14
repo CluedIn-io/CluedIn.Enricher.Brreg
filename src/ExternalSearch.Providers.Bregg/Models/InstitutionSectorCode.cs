@@ -1,13 +1,13 @@
-﻿using RestSharp.Deserializers;
+using System.Text.Json.Serialization;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class InstitutionSectorCode
 	{
-		[DeserializeAs(Name = "kode")]
+		[JsonPropertyName("kode")]
 		public string Code { get; set; }
 
-		[DeserializeAs(Name = "beskrivelse")]
+		[JsonPropertyName("beskrivelse")]
 		public string Description { get; set; }
 	}
 }
