@@ -8,6 +8,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -104,30 +105,30 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
         [JsonPropertyName("hjemmeside")]
         public string Website { get; set; }
 
-        [DeserializeAs(Name = "harRegistrertAntallAnsatte")]
+        [JsonPropertyName("harRegistrertAntallAnsatte")]
         public bool? HasRegisteredNumberOfEmployees { get; set; }
 
-        [DeserializeAs(Name = "registreringsdatoMerverdiavgiftsregisteret")]
+        [JsonPropertyName("registreringsdatoMerverdiavgiftsregisteret")]
         public string VatRegistrationDate { get; set; }
 
-        [DeserializeAs(Name = "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret")]
+        [JsonPropertyName("registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret")]
         public string VatRegistrationDateEntityRegister { get; set; }
 
-        [DeserializeAs(Name = "aktivitet")]
+        [JsonPropertyName("aktivitet")]
         public List<string> Activities { get; set; }
 
-        [DeserializeAs(Name = "registrertIPartiregisteret")]
+        [JsonPropertyName("registrertIPartiregisteret")]
         public string RegisteredInPartyRegister { get; set; }
 
         public bool? RegisteredInPartyRegisterBool { get { return GetBool(RegisteredInPartyRegister); } }
 
-        [DeserializeAs(Name = "paategninger")]
+        [JsonPropertyName("paategninger")]
         public List<string> Endorsements { get; set; }
 
-        [DeserializeAs(Name = "erIKonsern")]
+        [JsonPropertyName("erIKonsern")]
         public bool? IsPartOfCorporateGroup { get; set; }
 
-        [DeserializeAs(Name = "respons_klasse")]
+        [JsonPropertyName("respons_klasse")]
         public string ResponseClass { get; set; }
 
         private bool? GetBool(string value)
