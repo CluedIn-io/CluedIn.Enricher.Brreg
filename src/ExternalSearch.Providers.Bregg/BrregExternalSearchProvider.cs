@@ -26,7 +26,6 @@ using CluedIn.ExternalSearch.Provider;
 using CluedIn.ExternalSearch.Providers.Bregg.Models;
 using CluedIn.ExternalSearch.Providers.Bregg.Net;
 using CluedIn.ExternalSearch.Providers.Bregg.Vocabularies;
-using CluedIn.Processing.EntityResolution;
 using RestSharp;
 using EntityType = CluedIn.Core.Data.EntityType;
 
@@ -390,7 +389,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             metadata.Properties[BrregVocabulary.Organization.OrganizationTypeFull]          = resultItem.Data.OrganisationType.PrintIfAvailable();
             metadata.Properties[BrregVocabulary.Organization.VoluntaryRegistered]           = resultItem.Data.VoluntaryRegisteredBool.PrintIfAvailable();
             metadata.Properties[BrregVocabulary.Organization.RegisteredImGoodsRegister]     = resultItem.Data.RegistredImGoodsRegisterBool.PrintIfAvailable();
-            metadata.Properties[BrregVocabulary.Organization.RegisteredBusinessRegister]    = resultItem.Data.RegistredImGoodsRegisterBool.PrintIfAvailable();
+            metadata.Properties[BrregVocabulary.Organization.RegisteredBusinessRegister]    = resultItem.Data.RegistredBusinessRegisterBool.PrintIfAvailable();
             metadata.Properties[BrregVocabulary.Organization.RegisteredFoundingRegister]    = resultItem.Data.RegisteredFoundingRegisterBool.PrintIfAvailable();
             metadata.Properties[BrregVocabulary.Organization.NumberEmployees]               = resultItem.Data.NumberEmployees.PrintIfAvailable();
             metadata.Properties[BrregVocabulary.Organization.BankruptBool]                  = resultItem.Data.BankruptBool.PrintIfAvailable();
@@ -404,6 +403,17 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             metadata.Properties[BrregVocabulary.Organization.LanguageVariant]               = resultItem.Data.LanguageVariant.PrintIfAvailable();
             metadata.Properties[BrregVocabulary.Organization.LatestFiledAnnualAccounts]     = resultItem.Data.LatestFiledAnnualAccounts.PrintIfAvailable();
             metadata.Properties[BrregVocabulary.Organization.Website]                       = resultItem.Data.Website.PrintIfAvailable();
+            metadata.Properties[BrregVocabulary.Organization.Name]                          = resultItem.Data.Name.PrintIfAvailable();
+            metadata.Properties[BrregVocabulary.Organization.OrgformCode]                   = resultItem.Data.Orgform?.Kode.PrintIfAvailable();
+            metadata.Properties[BrregVocabulary.Organization.OrgformDescription]            = resultItem.Data.Orgform?.Beskrivelse.PrintIfAvailable();
+            metadata.Properties[BrregVocabulary.Organization.HasRegisteredNumberOfEmployees] = resultItem.Data.HasRegisteredNumberOfEmployees.PrintIfAvailable();
+            metadata.Properties[BrregVocabulary.Organization.VatRegistrationDate]           = resultItem.Data.VatRegistrationDate.PrintIfAvailable();
+            metadata.Properties[BrregVocabulary.Organization.VatRegistrationDateEntityRegister] = resultItem.Data.VatRegistrationDateEntityRegister.PrintIfAvailable();
+            metadata.Properties[BrregVocabulary.Organization.Activities]                    = resultItem.Data.Activities.PrintIfAvailable(v => string.Join(", ", v));
+            metadata.Properties[BrregVocabulary.Organization.RegisteredInPartyRegister]     = resultItem.Data.RegisteredInPartyRegisterBool.PrintIfAvailable();
+            metadata.Properties[BrregVocabulary.Organization.Endorsements]                  = resultItem.Data.Endorsements.PrintIfAvailable(v => string.Join(", ", v));
+            metadata.Properties[BrregVocabulary.Organization.IsPartOfCorporateGroup]        = resultItem.Data.IsPartOfCorporateGroup.PrintIfAvailable();
+            metadata.Properties[BrregVocabulary.Organization.ResponseClass]                 = resultItem.Data.ResponseClass.PrintIfAvailable();
         }
 
         private static void PopulateAddress(IEntityMetadata metadata, BrregAddressVocabulary vocabulary, PostAddress address)

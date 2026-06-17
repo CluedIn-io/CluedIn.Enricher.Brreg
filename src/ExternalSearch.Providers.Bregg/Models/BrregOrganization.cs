@@ -8,12 +8,13 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
-	public class BrregOrganization
+    public class BrregOrganization
     {
         [JsonPropertyName("organisasjonsnummer")]
         [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
@@ -103,6 +104,32 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 
         [JsonPropertyName("hjemmeside")]
         public string Website { get; set; }
+
+        [JsonPropertyName("harRegistrertAntallAnsatte")]
+        public bool? HasRegisteredNumberOfEmployees { get; set; }
+
+        [JsonPropertyName("registreringsdatoMerverdiavgiftsregisteret")]
+        public string VatRegistrationDate { get; set; }
+
+        [JsonPropertyName("registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret")]
+        public string VatRegistrationDateEntityRegister { get; set; }
+
+        [JsonPropertyName("aktivitet")]
+        public List<string> Activities { get; set; }
+
+        [JsonPropertyName("registrertIPartiregisteret")]
+        public string RegisteredInPartyRegister { get; set; }
+
+        public bool? RegisteredInPartyRegisterBool { get { return GetBool(RegisteredInPartyRegister); } }
+
+        [JsonPropertyName("paategninger")]
+        public List<string> Endorsements { get; set; }
+
+        [JsonPropertyName("erIKonsern")]
+        public bool? IsPartOfCorporateGroup { get; set; }
+
+        [JsonPropertyName("respons_klasse")]
+        public string ResponseClass { get; set; }
 
         private bool? GetBool(string value)
         {
