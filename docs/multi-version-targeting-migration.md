@@ -164,7 +164,12 @@ defense against the same class of mistake elsewhere.
 
 ## Step 8 — Push and confirm CI
 
-Status: see checklist below for outcome.
+Status: **Done**
+
+PR #41. First build (151868) was pending when a GitVersion timezone fix landed mid-flight (see
+Step 7); re-ran as build 151871 after that push — fully green: all three `Multi-version build+test`
+legs (4.7.0, 4.8.0, 5.0.0-beta.*) and `Multi-version: publish` passed. `executeIntegrationTests`
+stayed at its existing default (`false`) — unchanged by this migration.
 
 ---
 
@@ -179,5 +184,5 @@ Status: see checklist below for outcome.
 - [x] Integration test csproj — conditional xunit v2/v3 + AutoFixture selection
 - [x] Source — RestSharp `Method.Get`/`RestResponse` guards (4 src call sites + 1 test call site); Nager.PublicSuffix 2.4.0↔3.8.0 guards in `DomainName.cs` (new finding, not in any prior doc)
 - [x] `src`/tests build clean (0 errors) for all three legs, verified locally via real `dotnet build`
-- [x] `GitVersion.yml` — `next-version: 1.0`; `ignore.commits-before: 2026-06-18T00:00:00`; verified with pinned GitVersion.Tool 5.9.0
-- [ ] Push branch and confirm the actual Azure DevOps pipeline run is green end-to-end
+- [x] `GitVersion.yml` — `next-version: 1.0`; `ignore.commits-before: 2026-06-20T00:00:00` (2-day buffer, timezone-safe); verified `MajorMinorPatch` is really `1.0.0` with pinned GitVersion.Tool 5.9.0
+- [x] Pushed branch and confirmed the Azure DevOps pipeline is green end-to-end — PR #41, build 151871: all three legs + `Multi-version: publish` passed
