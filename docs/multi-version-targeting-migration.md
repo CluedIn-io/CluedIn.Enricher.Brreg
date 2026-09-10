@@ -139,15 +139,26 @@ clean, 0 errors, after these fixes.
 next-version: 1.0
 ignore:
   sha: []
-  commits-before: 2026-06-18T00:00:00
+  commits-before: 2026-06-20T00:00:00
 ```
 
 Highest pre-existing tag is `4.6.2` at `2026-06-17T17:25:09+10:00` (checked every tag candidate's
 real commit date via `git log -1 --format=%aI <tag>`, not tag-name sort order). Verified with the
 pipeline's actual pinned `GitVersion.Tool 5.9.0` (installed to a scratch tool-path, not the
 globally-installed version — which fails outright on this org's `pull-request: tag: pr` config on a
-version mismatch): resolves to `1.0.0-multi-version-targeting.83`, confirming the old tags are
-correctly ignored.
+version mismatch): resolves to `1.0.0-multi-version-targeting.8x`, confirming the old tags are
+correctly ignored — checked `MajorMinorPatch` explicitly (`1.0.0`), not just that the tool ran
+without error.
+
+**Widened to a 2-day buffer** (originally `2026-06-18T00:00:00`, one day past the tag): a sibling
+migration in this same batch (`CluedIn.Enricher.Gleif`) found `GitVersion.Tool 5.9.0` parses
+`commits-before` using the *local timezone of whatever machine runs it*, not UTC — and does so
+**silently**, with no error, just a wrong version that keeps incrementing off the old 4.x tag. A
+1-day buffer can be too tight depending on the CI agent's timezone; 2 days is safe regardless. This
+repo's original 1-day value already re-verified as safe under every possible timezone offset (the
+math: `commits-before` interpreted in any zone from UTC-12 to UTC+14 always lands after the tag's
+actual UTC instant here), but widened anyway for consistency with the rest of the batch and as
+defense against the same class of mistake elsewhere.
 
 ---
 
