@@ -301,7 +301,11 @@ namespace ExternalSearch.Bregg.Integration.Tests
         public void Id_DeserializationTest(string brregId)
         {
             var client  = new RestClient("http://data.brreg.no/enhetsregisteret");
+#if CLUEDIN_V50
             var request = new RestRequest($"api/enheter/{brregId}", Method.Get);
+#else
+            var request = new RestRequest($"api/enheter/{brregId}", Method.GET);
+#endif
 
             var response = client.Execute<BrregOrganization>(request);
 
