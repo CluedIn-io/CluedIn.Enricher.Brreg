@@ -1,5 +1,17 @@
 name: $(Date:yyyyMMdd)$(Rev:.r)
 parameters:
+  # Investigated 2026-09-11 whether it's safe to enable this. It isn't, for the same reason as
+  # CluedIn.Enricher.VatLayer (see its docs/multi-version-targeting-migration.md Step 10): temporary
+  # debug probes on BrregExternalSearchProvider's Accepts/BuildQueries/ExecuteSearch/BuildClues
+  # confirmed BaseExternalSearchTest<T>/the shared engine never invokes them for 12 of this repo's
+  # 13 integration tests - those either fail with a Moq "never invoked" assertion (silent no-op) or
+  # a NullReferenceException (the engine's own catch-block logging crashing on tests that don't set
+  # OriginEntityCode). Only HandleEmptyResponseTest, which bypasses the engine entirely and calls
+  # BuildClues directly, actually exercises real code and passes. Fixing this for real needs the
+  # same bespoke "rewrite each test to bypass the engine" treatment VatLayer's TestValidVATNumber
+  # got - a real per-test rewrite, not a quick flag flip - and here it'd need doing for most of the
+  # 12, not just one. Out of scope for a time-boxed pass; left at `false`. See
+  # docs/multi-version-targeting-migration.md for the full trace.
   - name: runIntegrationTests
     displayName: Run Integration Tests
     type: boolean

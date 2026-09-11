@@ -173,6 +173,39 @@ stayed at its existing default (`false`) — unchanged by this migration.
 
 ---
 
+## Step — Investigated whether integration tests can be safely enabled (they can't yet)
+
+Status: **Investigated, left disabled — same root cause as `CluedIn.Enricher.VatLayer`**
+
+This repo has 13 active (non-`[Skip]`) integration tests in `BrregTests.cs`. Added temporary debug
+probes (`Console.WriteLine`) to every method `BrregExternalSearchProvider` exposes via
+`IConfigurableExternalSearchProvider` — `Accepts`, `BuildQueries`, `ExecuteSearch`, `BuildClues` —
+and ran the full suite with `runIntegrationTests` effectively on.
+
+**Result: 1 of 13 tests genuinely passes (`HandleEmptyResponseTest`), 12 fail.** The probes confirm
+why: `BaseExternalSearchTest<T>`/`ExternalSearchEngine.BuildQueriesAsync` never invokes the
+provider's own methods for any test driven through `this.Setup(...)` — only
+`HandleEmptyResponseTest`, which bypasses the engine entirely and calls `BuildClues` directly with a
+hand-built context, actually exercises real code. This is the exact same engine-wiring bug found and
+root-caused in `CluedIn.Enricher.VatLayer` (see its `docs/multi-version-targeting-migration.md`
+Step 10) — not something specific to this repo's code.
+
+Of the 12 broken tests: most fail with a Moq `"Expected invocation... but was never performed"` —
+a silent no-op, the same shape VatLayer's originally-"passing" tests had. Two
+(`TestWrongCountryCode`, `TestNoResultsFound` — the tests that deliberately don't set
+`OriginEntityCode`, since they expect no result) instead hit the *masking* NullReferenceException
+VatLayer's Step 8/9 already root-caused (the engine's own catch-block logging dereferences an unset
+`OriginEntityCode`).
+
+VatLayer's real fix (`TestValidVATNumber`) required rewriting one test to bypass the engine and
+drive the provider's `BuildQueries`/`ExecuteSearch`/`BuildClues` pipeline directly, the same way
+`HandleEmptyResponseTest` already does here. Doing the same for Brreg would mean rewriting most of
+its 12 broken tests, not just one — a substantially larger, genuinely separate effort, out of scope
+for a time-boxed investigation. Debug probes reverted; `git status` clean.
+`runIntegrationTests` stays at `false`.
+
+---
+
 ## Checklist
 
 - [x] `azure-pipelines.yml` — switched to `crawler.build.jobs.yml` with `multiVersionCluedInTargets` (4.7.0, 4.8.0, 5.0.0-beta.*); kept existing `windows-latest` pool
