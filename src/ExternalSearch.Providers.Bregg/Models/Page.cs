@@ -1,13 +1,19 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class Page
 	{
-		[JsonPropertyName("size")]
+		[JsonProperty("size")]
 		public int Size { get; set; }
 
-		[JsonPropertyName("page")]
-		public int PageCount { get; set; }
+		[JsonProperty("number")]
+		public int PageNumber { get; set; }
+
+		[JsonProperty("totalElements")]
+		public long TotalElements { get; set; }
+
+		[JsonProperty("totalPages")]
+		public int TotalPages { get; set; }
 	}
 }

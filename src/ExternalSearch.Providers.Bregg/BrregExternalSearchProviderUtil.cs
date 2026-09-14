@@ -43,7 +43,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             {
                 if (!string.IsNullOrEmpty(jsonString))
                 {
-                    var obj = JsonUtility.Deserialize<T>(jsonString);
+                    var obj = JsonConvert.DeserializeObject<T>(jsonString);
                     return true;
                 }
             }
