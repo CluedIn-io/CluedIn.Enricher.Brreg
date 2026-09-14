@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using Nager.PublicSuffix;
 #if CLUEDIN_V50
@@ -21,15 +22,30 @@ internal static class DomainName
 #if CLUEDIN_V50
     private static DomainParser CreateDomainParser()
     {
-        var ruleProvider = new SimpleHttpRuleProvider();
-        ruleProvider.BuildAsync().GetAwaiter().GetResult();
+        try
+        {
+            var ruleProvider = new SimpleHttpRuleProvider();
+            ruleProvider.BuildAsync().GetAwaiter().GetResult();
 
-        return new DomainParser(ruleProvider);
+            return new DomainParser(ruleProvider);
+        }
+        catch (Exception)
+        {
+            // The rule list is loaded remotely. If it is unavailable, skip the optional
+            // website TLD optimisation rather than failing every enrichment query.
+            return null;
+        }
     }
 #endif
 
     public static bool TryParse(string domain, [NotNullWhen(true)]out DomainInfo? domainInfo)
     {
+        if (domainParser == null)
+        {
+            domainInfo = null;
+            return false;
+        }
+
         try
         {
             domainInfo = domainParser.Parse(domain);
