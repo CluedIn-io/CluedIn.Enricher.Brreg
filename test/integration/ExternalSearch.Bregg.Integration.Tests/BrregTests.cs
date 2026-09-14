@@ -60,7 +60,7 @@ namespace ExternalSearch.Bregg.Integration.Tests
             Assert.Equal("NORDEA AKTUARTJENESTER NORGE AS", organization.Name);
             Assert.Equal("{\"kode\":\"AS\",\"beskrivelse\":\"Aksjeselskap\"}", organization.OrganisationType);
             Assert.Equal("{\"self\":{\"href\":\"https://data.brreg.no/enhetsregisteret/api/enheter/981125096\"}}", organization.Links);
-            Assert.True(organization.RegistredImGoodsRegisterBool);
+            Assert.True(organization.RegistredImGoodsRegisterBool == true);
             Assert.Equal("66.290", organization.IndustryCode1.Code);
             Assert.Equal("Kontaktperson mangler", organization.Endorsements.Single().Text);
         }
