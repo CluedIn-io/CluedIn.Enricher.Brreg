@@ -10,7 +10,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 		[JsonProperty("beskrivelse")]
 		public string FullNameForCode { get; set; }
 
-		[JsonProperty("links")]
+		[JsonProperty("_links")]
 		public SelfLink Links { get; set; }
 	}
 }

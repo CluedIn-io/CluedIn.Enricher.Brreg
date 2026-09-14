@@ -1,10 +1,10 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class SelfLink
 	{
-		[JsonPropertyName("self")]
+		[JsonProperty("self")]
 		public LinkHref Self { get; set; }
 	}
 }

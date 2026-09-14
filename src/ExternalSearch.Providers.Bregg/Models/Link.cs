@@ -1,13 +1,13 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class Link
 	{
-		[JsonPropertyName("rel")]
+		[JsonProperty("rel")]
 		public string Rel { get; set; }
 
-		[JsonPropertyName("href")]
+		[JsonProperty("href")]
 		public string Href { get; set; }
 	}
 }

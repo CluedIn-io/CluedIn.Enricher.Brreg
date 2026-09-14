@@ -1,29 +1,29 @@
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class PostAddress
 	{
-		[JsonPropertyName("adresse")]
+		[JsonProperty("adresse")]
 		public List<string> Address { get; set; }
 
-		[JsonPropertyName("postnummer")]
+		[JsonProperty("postnummer")]
 		public string PostalCode { get; set; }
 
-		[JsonPropertyName("poststed")]
+		[JsonProperty("poststed")]
 		public string PostalArea { get; set; }
 
-		[JsonPropertyName("kommunenummer")]
+		[JsonProperty("kommunenummer")]
 		public string MunicipalityNumber { get; set; }
 
-		[JsonPropertyName("kommune")]
+		[JsonProperty("kommune")]
 		public string Municipality { get; set; }
 
-		[JsonPropertyName("landkode")]
+		[JsonProperty("landkode")]
 		public string CountryCode { get; set; }
 
-		[JsonPropertyName("land")]
+		[JsonProperty("land")]
 		public string Country { get; set; }
 	}
 }
