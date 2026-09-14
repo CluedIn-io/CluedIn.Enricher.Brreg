@@ -1,38 +1,29 @@
 using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
     internal class RawJsonStringConverter : JsonConverter<string>
     {
-        public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override string ReadJson(JsonReader reader, Type objectType, string existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             switch (reader.TokenType)
             {
-                case JsonTokenType.Null:
+                case JsonToken.Null:
                     return null;
-                case JsonTokenType.String:
-                    return reader.GetString();
-                case JsonTokenType.True:
-                    return "true";
-                case JsonTokenType.False:
-                    return "false";
+                case JsonToken.String:
+                    return (string)reader.Value;
+                case JsonToken.Boolean:
+                    return Convert.ToString(reader.Value, System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant();
                 default:
-                    using (var doc = JsonDocument.ParseValue(ref reader))
-                        return doc.RootElement.GetRawText();
+                    return JToken.Load(reader).ToString(Formatting.None);
             }
         }
 
-        public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+        public override void WriteJson(JsonWriter writer, string value, JsonSerializer serializer)
         {
-            if (value == null)
-            {
-                writer.WriteNullValue();
-                return;
-            }
-
-            writer.WriteStringValue(value);
+            writer.WriteValue(value);
         }
     }
 }

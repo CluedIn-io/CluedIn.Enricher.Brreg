@@ -1,17 +1,17 @@
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class RootBrregOrganization
 	{
-		[JsonPropertyName("_embedded")]
+		[JsonProperty("_embedded")]
 		public Unit Embedded { get; set; }
 
-		[JsonPropertyName("_links")]
-		public List<Link> Links { get; set; }
+		[JsonProperty("_links")]
+		public Dictionary<string, LinkHref> Links { get; set; }
 
-		[JsonPropertyName("page")]
+		[JsonProperty("page")]
 		public Page Page { get; set; }
 	}
 }
