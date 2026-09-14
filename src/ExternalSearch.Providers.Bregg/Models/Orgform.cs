@@ -1,13 +1,13 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class Orgform
 	{
-		[JsonPropertyName("kode")]
+		[JsonProperty("kode")]
 		public string Kode { get; set; }
 
-		[JsonPropertyName("beskrivelse")]
+		[JsonProperty("beskrivelse")]
 		public string Beskrivelse { get; set; }
 	}
 }

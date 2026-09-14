@@ -1,11 +1,11 @@
-using System.Text.Json.Serialization;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
     public class Unit
     {
-        [JsonPropertyName("enheter")]
+        [JsonProperty("enheter")]
         public List<BrregOrganization> Data { get; set; }
     }
 }

@@ -13,9 +13,19 @@ internal static class DomainName
     // 2.4.0 (flat Nager.PublicSuffix namespace, WebTldRuleProvider); CluedIn 5.0+ (net10.0) resolve
     // Nager.PublicSuffix 3.8.0 (RuleProviders/Exceptions sub-namespaces, SimpleHttpRuleProvider).
 #if CLUEDIN_V50
-    private static readonly DomainParser domainParser = new(new SimpleHttpRuleProvider());
+    private static readonly DomainParser domainParser = CreateDomainParser();
 #else
     private static readonly DomainParser domainParser = new(new WebTldRuleProvider());
+#endif
+
+#if CLUEDIN_V50
+    private static DomainParser CreateDomainParser()
+    {
+        var ruleProvider = new SimpleHttpRuleProvider();
+        ruleProvider.BuildAsync().GetAwaiter().GetResult();
+
+        return new DomainParser(ruleProvider);
+    }
 #endif
 
     public static bool TryParse(string domain, [NotNullWhen(true)]out DomainInfo? domainInfo)
