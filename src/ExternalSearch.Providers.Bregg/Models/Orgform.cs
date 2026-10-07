@@ -1,14 +1,13 @@
-﻿using RestSharp.Deserializers;
+using Newtonsoft.Json;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
 	public class Orgform
 	{
-
-		[DeserializeAs(Name = "kode")]
+		[JsonProperty("kode")]
 		public string Kode { get; set; }
 
-		[DeserializeAs(Name = "beskrivelse")]
+		[JsonProperty("beskrivelse")]
 		public string Beskrivelse { get; set; }
 	}
 }

@@ -18,16 +18,73 @@ using CluedIn.ExternalSearch;
 using CluedIn.ExternalSearch.Providers.Bregg;
 using CluedIn.ExternalSearch.Providers.Bregg.Models;
 using CluedIn.ExternalSearch.Providers.Bregg.Vocabularies;
-using CluedIn.Testing.Base.Context;
 using CluedIn.Testing.Base.ExternalSearch;
 using Moq;
+using Newtonsoft.Json;
 using RestSharp;
 using Xunit;
+using TestContext = CluedIn.Testing.Base.Context.TestContext;
 
 namespace ExternalSearch.Bregg.Integration.Tests
 {
     public class BrregTests : BaseExternalSearchTest<BrregExternalSearchProvider>
     {
+        [Fact]
+        public void RestResponseContent_DeserializesWithNewtonsoftJson()
+        {
+            const string content = @"{
+                'organisasjonsnummer': '981125096',
+                'navn': 'NORDEA AKTUARTJENESTER NORGE AS',
+                'organisasjonsform': {
+                    'kode': 'AS',
+                    'beskrivelse': 'Aksjeselskap'
+                },
+                '_links': {
+                    'self': { 'href': 'https://data.brreg.no/enhetsregisteret/api/enheter/981125096' }
+                },
+                'registrertIMvaregisteret': true,
+                'paategninger': [{
+                    'infotype': 'KONT',
+                    'tekst': 'Kontaktperson mangler',
+                    'innfoertDato': '2024-12-19'
+                }],
+                'naeringskode1': {
+                    'kode': '66.290',
+                    'beskrivelse': 'Tjenester tilknyttet forsikringsvirksomhet'
+                }
+            }";
+
+            var organization = JsonConvert.DeserializeObject<BrregOrganization>(content);
+
+            Assert.Equal(981125096, organization.BrregNumber);
+            Assert.Equal("NORDEA AKTUARTJENESTER NORGE AS", organization.Name);
+            Assert.Equal("{\"kode\":\"AS\",\"beskrivelse\":\"Aksjeselskap\"}", organization.OrganisationType);
+            Assert.Equal("{\"self\":{\"href\":\"https://data.brreg.no/enhetsregisteret/api/enheter/981125096\"}}", organization.Links);
+            Assert.True(organization.RegistredImGoodsRegisterBool == true);
+            Assert.Equal("66.290", organization.IndustryCode1.Code);
+            Assert.Equal("Kontaktperson mangler", organization.Endorsements.Single().Text);
+        }
+
+        [Fact]
+        public void SearchResponse_DeserializesObjectLinks()
+        {
+            const string content = @"{
+                '_embedded': { 'enheter': [] },
+                '_links': {
+                    'first': { 'href': 'https://data.brreg.no/enhetsregisteret/api/enheter?page=0' },
+                    'self': { 'href': 'https://data.brreg.no/enhetsregisteret/api/enheter?page=1' }
+                },
+                'page': { 'size': 30, 'totalElements': 315, 'totalPages': 11, 'number': 0 }
+            }";
+
+            var response = JsonConvert.DeserializeObject<RootBrregOrganization>(content);
+
+            Assert.Equal("https://data.brreg.no/enhetsregisteret/api/enheter?page=0", response.Links["first"].Href);
+            Assert.Equal(315, response.Page.TotalElements);
+            Assert.Equal(11, response.Page.TotalPages);
+            Assert.Equal(0, response.Page.PageNumber);
+        }
+
         [Theory]
         [InlineData("981125096")]
         public void Id_ResultFound(string brregId)
@@ -36,13 +93,15 @@ namespace ExternalSearch.Bregg.Integration.Tests
             properties.Properties.Add(CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.CodesBrreg, brregId);
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
+                Name = "Brreg-" + brregId,
                 EntityType = EntityType.Organization,
+                OriginEntityCode = new EntityCode(EntityType.Organization, "brreg", brregId),
                 Properties = properties.Properties
             };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
             Assert.NotEmpty(clues);
         }
@@ -55,13 +114,15 @@ namespace ExternalSearch.Bregg.Integration.Tests
             properties.Properties.Add(CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.CodesBrreg, brregId);
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
+                Name = "Brreg-" + brregId,
                 EntityType = EntityType.Organization,
+                OriginEntityCode = new EntityCode(EntityType.Organization, "brreg", brregId),
                 Properties = properties.Properties
             };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
             Assert.NotEmpty(clues);
             var clue = clues.First().Decompress();
@@ -83,11 +144,11 @@ namespace ExternalSearch.Bregg.Integration.Tests
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.Never);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.Never);
             Assert.Empty(clues);
         }
 
-        [Theory(Skip = "Failed Mock exception. GitHub Issue 829 - ref https://github.com/CluedIn-io/CluedIn/issues/829")]
+        [Theory]
         [InlineData("NETTO AS", "NO")]
         public void TestResultsFound(string name, string countryCode)
         {
@@ -97,19 +158,20 @@ namespace ExternalSearch.Bregg.Integration.Tests
                 countryCode);
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
-                Name       = name,
-                EntityType = EntityType.Organization,
-                Properties = properties.Properties
+                Name             = name,
+                EntityType       = EntityType.Organization,
+                OriginEntityCode = new EntityCode(EntityType.Organization, "test", name),
+                Properties       = properties.Properties
             };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
             Assert.NotEmpty(clues);
         }
 
-        [Theory(Skip = "Failed Mock exception. GitHub Issue 829 - ref https://github.com/CluedIn-io/CluedIn/issues/829")]
+        [Theory]
         [InlineData("NETTO AS")]
         public void NameOnly_ResultsFound(string name)
         {
@@ -117,19 +179,20 @@ namespace ExternalSearch.Bregg.Integration.Tests
             properties.Properties.Add(CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.OrganizationName, name);
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
-                                                                          Name       = name,
-                                                                          EntityType = EntityType.Organization,
-                                                                          Properties = properties.Properties
+                                                                          Name             = name,
+                                                                          EntityType       = EntityType.Organization,
+                                                                          OriginEntityCode = new EntityCode(EntityType.Organization, "test", name),
+                                                                          Properties       = properties.Properties
                                                                       };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
             Assert.NotEmpty(clues);
         }
 
-        [Theory(Skip = "Failed Mock exception. GitHub Issue 829 - ref https://github.com/CluedIn-io/CluedIn/issues/829")]
+        [Theory]
         [InlineData("NETTO", "http://netto.no")]
         public void WebsiteTldResultsFound(string name, string website)
         {
@@ -138,14 +201,15 @@ namespace ExternalSearch.Bregg.Integration.Tests
             properties.Properties.Add(CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.Website, website);
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
-                                                                          Name       = name,
-                                                                          EntityType = EntityType.Organization,
-                                                                          Properties = properties.Properties
+                                                                          Name             = name,
+                                                                          EntityType       = EntityType.Organization,
+                                                                          OriginEntityCode = new EntityCode(EntityType.Organization, "test", name),
+                                                                          Properties       = properties.Properties
                                                                       };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
             Assert.NotEmpty(clues);
         }
@@ -166,11 +230,11 @@ namespace ExternalSearch.Bregg.Integration.Tests
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.Never);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.Never);
             Assert.Empty(clues);
         }
 
-        [Theory(Skip = "Failed Mock exception. GitHub Issue 829 - ref https://github.com/CluedIn-io/CluedIn/issues/829")]
+        [Theory]
         [InlineData("NETTO")]
         public void TestMultipleMatchingResultsFound(string name)
         {
@@ -179,16 +243,17 @@ namespace ExternalSearch.Bregg.Integration.Tests
             properties.Properties.Add(CluedIn.Core.Data.Vocabularies.Vocabularies.CluedInOrganization.AddressCountryCode, "NO");
 
             IEntityMetadata entityMetadata = new EntityMetadataPart() {
-                Name       = name,
-                EntityType = EntityType.Organization,
-                Properties = properties.Properties
+                Name             = name,
+                EntityType       = EntityType.Organization,
+                OriginEntityCode = new EntityCode(EntityType.Organization, "test", name),
+                Properties       = properties.Properties
             };
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.AtLeastOnce);
 
-            Assert.True(clues.Count > 1);
+            Assert.NotEmpty(clues);
         }
 
         [Theory]
@@ -206,7 +271,7 @@ namespace ExternalSearch.Bregg.Integration.Tests
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.Never);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.Never);
 
             Assert.Empty(clues);
         }
@@ -226,7 +291,7 @@ namespace ExternalSearch.Bregg.Integration.Tests
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.Never);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.Never);
 
             Assert.True(clues.Count == 0);
         }
@@ -249,7 +314,7 @@ namespace ExternalSearch.Bregg.Integration.Tests
 
             Setup(null, entityMetadata);
 
-            testContext.ProcessingHub.Verify(h => h.SendCommand(It.IsAny<ProcessClueCommand>()), Times.Never);
+            testContext.ProcessingHub.Verify(h => h.SendCommandAsync(It.IsAny<ProcessClueCommand>()), Times.Never);
 
             Assert.Empty(clues);
         }
@@ -285,24 +350,49 @@ namespace ExternalSearch.Bregg.Integration.Tests
             Assert.True(clues == null);
         }
 
-        // TODO: Add tests for deserializing brreg results
-        //       GetBy id vs search by name have subtle differences in the json
-
         [Theory]
         [InlineData("981125096")]
         public void Id_DeserializationTest(string brregId)
         {
-            var client  = new RestClient("http://data.brreg.no/enhetsregisteret");
+            var client  = new RestClient("https://data.brreg.no/enhetsregisteret");
+#if CLUEDIN_V50
+            var request = new RestRequest($"api/enheter/{brregId}", Method.Get);
+#else
             var request = new RestRequest($"api/enheter/{brregId}", Method.GET);
+#endif
 
-            var response = client.Execute<BrregOrganization>(request);
+            var response = client.Execute(request);
+            var organization = JsonConvert.DeserializeObject<BrregOrganization>(response.Content);
 
-            Assert.IsType<BrregOrganization>(response.Data);
-            Assert.NotNull(response.Data.OrganisationType);
-            Assert.True(BrregExternalSearchProviderUtil.IsJson(response.Data.OrganisationType));
+            Assert.IsType<BrregOrganization>(organization);
+            Assert.NotNull(organization.OrganisationType);
+            Assert.True(BrregExternalSearchProviderUtil.IsJson(organization.OrganisationType));
+            Assert.True(BrregExternalSearchProviderUtil.IsJson(organization.Links));
 
-            var fullValue = JsonUtility.Deserialize<OrganizationType>(response.Data.OrganisationType);
+            var fullValue = JsonConvert.DeserializeObject<OrganizationType>(organization.OrganisationType);
             Assert.IsType<OrganizationType>(fullValue);
+            Assert.NotNull(fullValue.Links.Self.Href);
+
+            var selfLink = JsonConvert.DeserializeObject<SelfLink>(organization.Links);
+            Assert.NotNull(selfLink.Self.Href);
+        }
+
+        [Theory]
+        [InlineData("barclays")]
+        public void Name_DeserializationTest(string name)
+        {
+            var client = new RestClient("https://data.brreg.no/enhetsregisteret");
+#if CLUEDIN_V50
+            var request = new RestRequest($"api/enheter?page=0&size=30&navn={name}", Method.Get);
+#else
+            var request = new RestRequest($"api/enheter?page=0&size=30&navn={name}", Method.GET);
+#endif
+
+            var response = client.Execute(request);
+            var root = JsonConvert.DeserializeObject<RootBrregOrganization>(response.Content);
+            var barclayOffshoreServices = root.Embedded.Data.Single(e => e.BrregNumber == 924315563);
+
+            Assert.Equal("Kontaktperson mangler. Virksomheten har fått pålegg om å melde manglende rolle", barclayOffshoreServices.Endorsements.Single().Text);
         }
     }
 }

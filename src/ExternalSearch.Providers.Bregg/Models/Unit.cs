@@ -1,11 +1,11 @@
-﻿using RestSharp.Deserializers;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Models
 {
     public class Unit
     {
-        [DeserializeAs(Name = "enheter")]
+        [JsonProperty("enheter")]
         public List<BrregOrganization> Data { get; set; }
     }
 }

@@ -1,14 +1,51 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System;
+using System.Diagnostics.CodeAnalysis;
 using Nager.PublicSuffix;
+#if CLUEDIN_V50
+using Nager.PublicSuffix.Exceptions;
+using Nager.PublicSuffix.RuleProviders;
+#endif
 
 namespace CluedIn.ExternalSearch.Providers.Bregg.Net;
 
 internal static class DomainName
 {
+    // Nager.PublicSuffix major-version break: CluedIn 4.7/4.8 (net6.0) resolve Nager.PublicSuffix
+    // 2.4.0 (flat Nager.PublicSuffix namespace, WebTldRuleProvider); CluedIn 5.0+ (net10.0) resolve
+    // Nager.PublicSuffix 3.8.0 (RuleProviders/Exceptions sub-namespaces, SimpleHttpRuleProvider).
+#if CLUEDIN_V50
+    private static readonly DomainParser domainParser = CreateDomainParser();
+#else
     private static readonly DomainParser domainParser = new(new WebTldRuleProvider());
+#endif
+
+#if CLUEDIN_V50
+    private static DomainParser CreateDomainParser()
+    {
+        try
+        {
+            var ruleProvider = new SimpleHttpRuleProvider();
+            ruleProvider.BuildAsync().GetAwaiter().GetResult();
+
+            return new DomainParser(ruleProvider);
+        }
+        catch (Exception)
+        {
+            // The rule list is loaded remotely. If it is unavailable, skip the optional
+            // website TLD optimisation rather than failing every enrichment query.
+            return null;
+        }
+    }
+#endif
 
     public static bool TryParse(string domain, [NotNullWhen(true)]out DomainInfo? domainInfo)
     {
+        if (domainParser == null)
+        {
+            domainInfo = null;
+            return false;
+        }
+
         try
         {
             domainInfo = domainParser.Parse(domain);
@@ -20,4 +57,12 @@ internal static class DomainName
             return false;
         }
     }
+
+    // DomainInfo.TLD (2.4.0) was renamed to DomainInfo.TopLevelDomain (3.8.0).
+    public static string GetTopLevelDomain(DomainInfo domainInfo) =>
+#if CLUEDIN_V50
+        domainInfo.TopLevelDomain;
+#else
+        domainInfo.TLD;
+#endif
 }

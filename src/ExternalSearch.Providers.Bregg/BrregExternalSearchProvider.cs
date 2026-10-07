@@ -26,6 +26,7 @@ using CluedIn.ExternalSearch.Provider;
 using CluedIn.ExternalSearch.Providers.Bregg.Models;
 using CluedIn.ExternalSearch.Providers.Bregg.Net;
 using CluedIn.ExternalSearch.Providers.Bregg.Vocabularies;
+using Newtonsoft.Json;
 using RestSharp;
 using EntityType = CluedIn.Core.Data.EntityType;
 
@@ -36,6 +37,15 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
     public class BrregExternalSearchProvider : ExternalSearchProviderBase, IExtendedEnricherMetadata, IConfigurableExternalSearchProvider, IExternalSearchProviderWithVerifyConnection
     {
         private static readonly EntityType[] DefaultAcceptedEntityTypes = { EntityType.Organization };
+
+        // RestSharp major-version break: CluedIn 4.7/4.8 (net6.0) resolve RestSharp 106.x
+        // (Method.GET, uppercase enum); CluedIn 5.0+ (net10.0) resolve RestSharp 114.x
+        // (Method.Get, PascalCase).
+#if CLUEDIN_V50
+        private const Method HttpGetMethod = Method.Get;
+#else
+        private const Method HttpGetMethod = Method.GET;
+#endif
 
         /**********************************************************************************************************
          * CONSTRUCTORS
@@ -138,7 +148,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             {
                 var hosts = website.Where(UriUtility.IsValid).Select(u => new Uri(u).Host.ToLowerInvariant()).Distinct();
 
-                if (hosts.Any(h => DomainName.TryParse(h, out var domain) && string.Equals(domain.TLD, "no", StringComparison.InvariantCultureIgnoreCase)))
+                if (hosts.Any(h => DomainName.TryParse(h, out var domain) && string.Equals(DomainName.GetTopLevelDomain(domain), "no", StringComparison.InvariantCultureIgnoreCase)))
                     namePostFixFilter = value => false;
             }
 
@@ -159,27 +169,26 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
         public IEnumerable<IExternalSearchQueryResult> ExecuteSearch(ExecutionContext context, IExternalSearchQuery query, IDictionary<string, object> config, IProvider provider)
         {
-            var client = new RestClient("http://data.brreg.no/enhetsregisteret");
+            var client = new RestClient("https://data.brreg.no/enhetsregisteret");
             RestRequest request;
 
             if (query.QueryParameters.ContainsKey(ExternalSearchQueryParameter.Identifier))
             {
                 var id = query.QueryParameters[ExternalSearchQueryParameter.Identifier].FirstOrDefault();
 
-                request = new RestRequest($"api/enheter/{id}", Method.GET) {
+                request = new RestRequest($"api/enheter/{id}", HttpGetMethod) {
                     OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
                 };
 
-                var response = client.Execute<BrregOrganization>(request);
+                var response = client.Execute(request);
 
                 switch (response.StatusCode)
                 {
                     case HttpStatusCode.OK:
                     {
-                        if (response.Data != null)
+                        var org = JsonConvert.DeserializeObject<BrregOrganization>(response.Content);
+                        if (org != null)
                         {
-                            var org = response.Data;
-
                             if (org.BrregNumber == 0 && string.IsNullOrEmpty(org.Name))
                                 yield break;
 
@@ -203,20 +212,20 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
                 var name = query.QueryParameters[ExternalSearchQueryParameter.Name].FirstOrDefault();
                 if (!string.IsNullOrEmpty(name))
                 {
-                    request = new RestRequest($"api/enheter?page=0&size=30&navn={name}", Method.GET) {
+                    request = new RestRequest($"api/enheter?page=0&size=30&navn={name}", HttpGetMethod) {
                         OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
                     };
 
-                    var response = client.Execute<RootBrregOrganization>(request);
+                    var response = client.Execute(request);
 
                     switch (response.StatusCode)
                     {
                         case HttpStatusCode.OK:
                         {
-                            if (response.Data?.Embedded?.Data != null)
+                            var root = JsonConvert.DeserializeObject<RootBrregOrganization>(response.Content);
+                            if (root?.Embedded?.Data != null)
                             {
-                                var filterResponse = response.Data.Embedded.Data.Where(e => e.Name.StartsWith(name, StringComparison.InvariantCultureIgnoreCase));
-                                foreach (var org in filterResponse)
+                                foreach (var org in root.Embedded.Data)
                                 {
                                     if (org.BrregNumber == 0 && string.IsNullOrEmpty(org.Name))
                                         continue;
@@ -278,30 +287,34 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
 
         public ConnectionVerificationResult VerifyConnection(ExecutionContext context, IReadOnlyDictionary<string, object> config)
         {
-            var client = new RestClient("http://data.brreg.no/enhetsregisteret/");
+            var client = new RestClient("https://data.brreg.no/enhetsregisteret/");
 
-            RestRequest request = new RestRequest("api/enheter/912406652", Method.GET)
+            RestRequest request = new RestRequest("api/enheter/912406652", HttpGetMethod)
             {
                 OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
             };
-            var searchByBrregCodeResponse = client.Execute<BrregOrganization>(request);
+            var searchByBrregCodeResponse = client.Execute(request);
 
             if (!searchByBrregCodeResponse.IsSuccessful) 
             {
                 return ConstructVerifyConnectionResponse(searchByBrregCodeResponse);
             }
 
-            request = new RestRequest($"api/enheter?page=0&size=30&navn=Google", Method.GET)
+            request = new RestRequest($"api/enheter?page=0&size=30&navn=Google", HttpGetMethod)
             {
                 OnBeforeDeserialization = resp => { resp.ContentType = "application/json"; }
             };
 
-            var searchByNameResponse = client.Execute<RootBrregOrganization>(request);
+            var searchByNameResponse = client.Execute(request);
 
             return ConstructVerifyConnectionResponse(searchByNameResponse);
         }
 
+#if CLUEDIN_V50
+        private ConnectionVerificationResult ConstructVerifyConnectionResponse(RestResponse response)
+#else
         private ConnectionVerificationResult ConstructVerifyConnectionResponse(IRestResponse response)
+#endif
         {
             var errorMessageBase = $"{Constants.ProviderName} returned \"{(int)response.StatusCode} {response.StatusDescription}\".";
             if (response.ErrorException != null)
@@ -411,7 +424,7 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             metadata.Properties[BrregVocabulary.Organization.VatRegistrationDateEntityRegister] = resultItem.Data.VatRegistrationDateEntityRegister.PrintIfAvailable();
             metadata.Properties[BrregVocabulary.Organization.Activities]                    = resultItem.Data.Activities.PrintIfAvailable(v => string.Join(", ", v));
             metadata.Properties[BrregVocabulary.Organization.RegisteredInPartyRegister]     = resultItem.Data.RegisteredInPartyRegisterBool.PrintIfAvailable();
-            metadata.Properties[BrregVocabulary.Organization.Endorsements]                  = resultItem.Data.Endorsements.PrintIfAvailable(v => string.Join(", ", v));
+            metadata.Properties[BrregVocabulary.Organization.Endorsements]                  = resultItem.Data.Endorsements.PrintIfAvailable(v => string.Join(", ", v.Where(e => !string.IsNullOrWhiteSpace(e.Text)).Select(e => e.Text)));
             metadata.Properties[BrregVocabulary.Organization.IsPartOfCorporateGroup]        = resultItem.Data.IsPartOfCorporateGroup.PrintIfAvailable();
             metadata.Properties[BrregVocabulary.Organization.ResponseClass]                 = resultItem.Data.ResponseClass.PrintIfAvailable();
         }
