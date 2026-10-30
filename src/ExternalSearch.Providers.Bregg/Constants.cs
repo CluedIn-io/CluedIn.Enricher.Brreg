@@ -102,6 +102,30 @@ namespace CluedIn.ExternalSearch.Providers.Bregg
             }
         };
 
+        private static Dictionary<string, object> CreateFieldGroup(string id, string label, params string[] fields) => new()
+        {
+            ["id"] = id,
+            ["label"] = label,
+            ["fields"] = fields,
+        };
+
+        /// <summary>
+        /// The sections the UI groups the configuration fields into, in order. Fields no group lists
+        /// (such as the filter and rate limit settings added by CluedIn) go to the last group.
+        /// </summary>
+        public static readonly Dictionary<string, object>[] FieldGroups =
+        [
+            CreateFieldGroup("whatToEnrich", "What to enrich", KeyName.AcceptedEntityType, "enricherRuleCondition"),
+            CreateFieldGroup(
+                "fieldMapping",
+                "Field mapping",
+                KeyName.NameVocabularyKey,
+                KeyName.CountryCodeVocabularyKey,
+                KeyName.WebsiteVocabularyKey,
+                KeyName.BrregCodeVocabularyKey),
+            CreateFieldGroup("advanced", "Advanced"),
+        ];
+
         public static IEnumerable<Control> Properties { get; set; } = new List<Control>() {  };
         public static Guide Guide { get; set; } = new Guide
         {
